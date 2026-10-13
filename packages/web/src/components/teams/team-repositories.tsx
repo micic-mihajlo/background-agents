@@ -186,9 +186,7 @@ export function TeamRepositories({ team }: { team: TeamResponse }) {
       )}
       {canManageRepositories && (
         <div className="space-y-3 rounded-lg border border-border p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Add repository grant
-          </h3>
+          <h3 className="text-[13px] font-semibold text-muted-foreground">Add repository grant</h3>
           <p className="text-xs text-muted-foreground">
             Choose installation-wide access or named repositories, not both. Remove existing grants
             to switch scope.

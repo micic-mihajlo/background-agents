@@ -205,8 +205,8 @@ export function SessionListItem({
   return (
     <>
       <div
-        className={`group relative block px-4 py-2.5 border-l-2 transition ${
-          isActive ? "border-l-accent bg-accent-muted" : "border-l-transparent hover:bg-muted"
+        className={`group relative block rounded-md px-2.5 py-2 transition ${
+          isActive ? "bg-card shadow-card" : "hover:bg-muted"
         }`}
       >
         {isRenaming ? (
@@ -229,9 +229,9 @@ export function SessionListItem({
                   handleCancelRename();
                 }
               }}
-              className="w-full text-sm bg-transparent text-foreground outline-none focus:ring-inset focus:ring-ring font-medium pr-8"
+              className="w-full text-[13px] bg-transparent text-foreground outline-none focus:ring-inset focus:ring-ring font-medium pr-8"
             />
-            <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 mt-0.5 text-xs text-secondary-foreground">
               <span>{relativeTime}</span>
               <span>·</span>
               <span className="truncate">{repoInfo}</span>
@@ -261,7 +261,7 @@ export function SessionListItem({
             onTouchCancel={handleTouchEnd}
             className="block pr-8"
           >
-            <div className="flex items-center gap-1.5 text-sm text-foreground">
+            <div className="flex items-center gap-1.5 text-[13px] leading-[18px] text-foreground">
               {session.readState.unread && (
                 <>
                   <span
@@ -275,7 +275,13 @@ export function SessionListItem({
                 <PullRequestStateIcon state={prDisplay.state} label={prDisplay.label} />
               )}
               <span
-                className={`truncate ${session.readState.unread ? "font-semibold" : "font-medium"}`}
+                className={`truncate ${
+                  session.readState.unread
+                    ? "font-semibold"
+                    : isActive
+                      ? "font-medium"
+                      : "font-medium text-foreground/80"
+                }`}
               >
                 {displayTitle}
               </span>
@@ -283,10 +289,10 @@ export function SessionListItem({
                 <span className="shrink-0 text-xs font-medium text-destructive">Failed</span>
               )}
             </div>
-            <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
-              <span>{relativeTime}</span>
+            <div className="flex items-center gap-1 mt-0.5 text-xs text-secondary-foreground">
+              <span className="shrink-0">{relativeTime}</span>
               <span>·</span>
-              <span className="truncate">{repoInfo}</span>
+              <span className="truncate font-medium text-muted-foreground/80">{repoInfo}</span>
               {environmentName && (
                 <>
                   <span>·</span>
@@ -320,7 +326,7 @@ export function SessionListItem({
                   aria-label="Session actions"
                   aria-hidden={isMobile && !session.readState.unread ? "true" : undefined}
                   tabIndex={isMobile && !session.readState.unread ? -1 : undefined}
-                  className={`items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition data-[state=open]:opacity-100 ${
+                  className={`items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition data-[state=open]:opacity-100 ${
                     isMobile
                       ? session.readState.unread
                         ? "flex h-10 w-10"
@@ -414,8 +420,8 @@ export function ChildSessionListItem({
         onClick={() => {
           if (isMobile) onSessionSelect?.();
         }}
-        className={`block pr-9 py-1.5 border-l-2 transition ${
-          isActive ? "border-l-accent bg-accent-muted" : "border-l-transparent hover:bg-muted"
+        className={`block rounded-md pr-9 py-1.5 transition ${
+          isActive ? "bg-card shadow-card" : "hover:bg-muted"
         }`}
         style={{ paddingLeft: `${paddingLeftRem}rem` }}
       >
@@ -426,7 +432,7 @@ export function ChildSessionListItem({
               <span className="sr-only">Unread</span>
             </>
           )}
-          <span className="shrink-0 text-muted-foreground">{relativeTime}</span>
+          <span className="shrink-0 text-secondary-foreground">{relativeTime}</span>
           {prDisplay && <PullRequestStateIcon state={prDisplay.state} label={prDisplay.label} />}
           <span
             className={`truncate text-foreground ${session.readState.unread ? "font-semibold" : "font-medium"}`}

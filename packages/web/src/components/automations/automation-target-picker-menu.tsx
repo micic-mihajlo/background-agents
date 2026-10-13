@@ -112,9 +112,7 @@ export function AutomationTargetPickerMenu({
       {environments.length > 0 && (
         <>
           <div className="border-b border-border-muted px-3 py-2">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              Environments
-            </span>
+            <span className="text-xs font-medium text-muted-foreground">Environments</span>
           </div>
           <div className="max-h-40 overflow-y-auto border-b border-border-muted py-1">
             {environments.map((environment) => {
@@ -146,9 +144,7 @@ export function AutomationTargetPickerMenu({
       )}
 
       <div className="flex items-center justify-between border-b border-border-muted px-3 py-2">
-        <span className="text-xs font-medium uppercase text-muted-foreground">
-          All repositories
-        </span>
+        <span className="text-xs font-medium text-muted-foreground">All repositories</span>
         {multiTargetAllowed && (
           <Button type="button" variant="outline" size="xs" onClick={onToggleSelectionMode}>
             {multipleSelectionEnabled ? "Select One" : "Select Multiple"}

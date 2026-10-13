@@ -20,15 +20,15 @@ export function UserMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm font-medium text-foreground transition hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
+          className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-left text-[13px] font-medium text-foreground transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           aria-label={`Signed in as ${user?.name || "User"}`}
           title={`Signed in as ${user?.name || "User"}`}
         >
-          <span className="h-7 w-7 shrink-0 overflow-hidden rounded-full">
+          <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1 ring-border">
             {user?.image ? (
               <img src={user.image} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span className="flex h-full w-full items-center justify-center rounded-full bg-card text-xs font-medium text-foreground">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-accent-muted text-[11px] font-semibold text-accent">
                 {user?.name?.charAt(0).toUpperCase() || "?"}
               </span>
             )}

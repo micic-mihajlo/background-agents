@@ -26,211 +26,280 @@ pre code.hljs {
 
 :root,
 :root.light {
-  /* Core backgrounds */
-  --background: #f8f8f6;
-  --foreground: #1a1a1a;
+  /* App shell: the tinted frame behind the sidebar and the content panel */
+  --shell: #f5f5f7;
+
+  /* Core backgrounds (the content panel) */
+  --background: #ffffff;
+  --foreground: #1d1d1f;
 
   /* Card/surface backgrounds */
-  --card: #f8f8f6;
-  --card-foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+
+  /* Raised surfaces inside the panel (user messages, inline tiles) */
+  --panel: #f9f9fb;
 
   /* Popover/dropdown backgrounds */
   --popover: #ffffff;
-  --popover-foreground: #1a1a1a;
+  --popover-foreground: #1d1d1f;
 
   /* Primary (inverted button style) */
-  --primary: #1a1a1a;
+  --primary: #1d1d1f;
   --primary-foreground: #ffffff;
 
   /* Secondary */
   --secondary: rgba(0, 0, 0, 0.05);
 
-  /* Accent color (warm brown) */
-  --accent: #8b7355;
+  /* Accent color (system blue) */
+  --accent: #007aff;
   --accent-foreground: #ffffff;
-  --accent-muted: rgba(139, 115, 85, 0.1);
+  --accent-muted: rgba(0, 122, 255, 0.1);
 
-  /* Muted/secondary text (warm grays) */
-  --muted: rgba(0, 0, 0, 0.05);
-  --muted-foreground: #6b655f;
-  --secondary-foreground: #9c9690;
+  /* Muted/secondary text */
+  --muted: rgba(0, 0, 0, 0.04);
+  --muted-foreground: #6e6e73;
+  --secondary-foreground: #a1a1a6;
 
-  /* Destructive (warm brick red) */
-  --destructive: #c24a3a;
+  /* Destructive */
+  --destructive: #d70015;
   --destructive-foreground: #ffffff;
 
   /* Borders */
   --border: rgba(0, 0, 0, 0.1);
-  --border-muted: rgba(0, 0, 0, 0.05);
+  --border-muted: rgba(0, 0, 0, 0.06);
 
   /* Input backgrounds */
   --input: #ffffff;
 
   /* Focus ring */
-  --ring: #8b7355;
+  --ring: #007aff;
 
-  /* Success (sage green) */
-  --success: #4d9a5f;
-  --success-muted: rgba(77, 154, 95, 0.1);
+  /* Success */
+  --success: #248a3d;
+  --success-muted: rgba(36, 138, 61, 0.1);
 
-  /* Warning (warm amber) */
-  --warning: #c49135;
+  /* Warning */
+  --warning: #c96b00;
   --warning-foreground: #ffffff;
-  --warning-muted: rgba(196, 145, 53, 0.1);
+  --warning-muted: rgba(201, 107, 0, 0.1);
 
-  /* Info (muted steel blue) */
-  --info: #5b82a8;
+  /* Info */
+  --info: #007aff;
   --info-foreground: #ffffff;
-  --info-muted: rgba(91, 130, 168, 0.1);
+  --info-muted: rgba(0, 122, 255, 0.08);
 
   /* Destructive muted (error banners) */
-  --destructive-muted: rgba(194, 74, 58, 0.08);
-  --destructive-border: rgba(194, 74, 58, 0.2);
+  --destructive-muted: rgba(215, 0, 21, 0.07);
+  --destructive-border: rgba(215, 0, 21, 0.2);
 
   /* Overlay */
-  --overlay: rgba(0, 0, 0, 0.5);
+  --overlay: rgba(0, 0, 0, 0.32);
+
+  /* Elevation */
+  --shadow-card: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-overlay: 0 10px 40px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
 
   /* Border radius */
-  --radius: 0.25rem;
+  --radius: 0.625rem;
 }
 
 /* Dark mode via system preference (no-JS fallback) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1a1a1a;
-    --foreground: #f8f8f6;
+    --shell: #000000;
 
-    --card: rgba(255, 255, 255, 0.05);
-    --card-foreground: #f8f8f6;
+    --background: #1c1c1e;
+    --foreground: #f5f5f7;
 
-    --popover: #252525;
-    --popover-foreground: #f8f8f6;
+    --card: #2c2c2e;
+    --card-foreground: #f5f5f7;
 
-    --primary: #f8f8f6;
-    --primary-foreground: #1a1a1a;
+    --panel: #242426;
 
-    --secondary: rgba(255, 255, 255, 0.05);
+    --popover: #2c2c2e;
+    --popover-foreground: #f5f5f7;
 
-    --accent: #a68b6a;
+    --primary: #f5f5f7;
+    --primary-foreground: #1c1c1e;
+
+    --secondary: rgba(255, 255, 255, 0.09);
+
+    --accent: #0a84ff;
     --accent-foreground: #ffffff;
-    --accent-muted: rgba(139, 115, 85, 0.2);
+    --accent-muted: rgba(10, 132, 255, 0.18);
 
-    --muted: rgba(255, 255, 255, 0.05);
-    --muted-foreground: #9c9690;
-    --secondary-foreground: #6b655f;
+    --muted: rgba(255, 255, 255, 0.07);
+    --muted-foreground: #98989d;
+    --secondary-foreground: #636366;
 
-    --destructive: #d4695e;
+    --destructive: #ff453a;
     --destructive-foreground: #ffffff;
 
-    --border: rgba(255, 255, 255, 0.1);
-    --border-muted: rgba(255, 255, 255, 0.05);
+    --border: rgba(255, 255, 255, 0.12);
+    --border-muted: rgba(255, 255, 255, 0.07);
 
-    --input: #1a1a1a;
+    --input: #2c2c2e;
 
-    --ring: #a68b6a;
+    --ring: #0a84ff;
 
-    --success: #6aad7a;
-    --success-muted: rgba(106, 173, 122, 0.15);
+    --success: #30d158;
+    --success-muted: rgba(48, 209, 88, 0.14);
 
-    /* Warning (warm amber) */
-    --warning: #d4a54a;
-    --warning-foreground: #ffffff;
-    --warning-muted: rgba(212, 165, 74, 0.15);
+    --warning: #ff9f0a;
+    --warning-foreground: #1c1c1e;
+    --warning-muted: rgba(255, 159, 10, 0.14);
 
-    /* Info (muted steel blue) */
-    --info: #7a9dbd;
-    --info-foreground: #ffffff;
-    --info-muted: rgba(122, 157, 189, 0.15);
+    --info: #64d2ff;
+    --info-foreground: #1c1c1e;
+    --info-muted: rgba(100, 210, 255, 0.14);
 
-    /* Destructive muted (error banners) */
-    --destructive-muted: rgba(212, 105, 94, 0.15);
-    --destructive-border: rgba(212, 105, 94, 0.3);
+    --destructive-muted: rgba(255, 69, 58, 0.12);
+    --destructive-border: rgba(255, 69, 58, 0.3);
 
-    /* Overlay */
-    --overlay: rgba(0, 0, 0, 0.5);
+    --overlay: rgba(0, 0, 0, 0.6);
+
+    --shadow-card: 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+    --shadow-overlay: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.1);
   }
 }
 
 /* Dark mode via class (authoritative when next-themes is loaded) */
 .dark {
-  --background: #1a1a1a;
-  --foreground: #f8f8f6;
+  --shell: #000000;
 
-  --card: rgba(255, 255, 255, 0.05);
-  --card-foreground: #f8f8f6;
+  --background: #1c1c1e;
+  --foreground: #f5f5f7;
 
-  --popover: #252525;
-  --popover-foreground: #f8f8f6;
+  --card: #2c2c2e;
+  --card-foreground: #f5f5f7;
 
-  --primary: #f8f8f6;
-  --primary-foreground: #1a1a1a;
+  --panel: #242426;
 
-  --secondary: rgba(255, 255, 255, 0.05);
+  --popover: #2c2c2e;
+  --popover-foreground: #f5f5f7;
 
-  --accent: #a68b6a;
+  --primary: #f5f5f7;
+  --primary-foreground: #1c1c1e;
+
+  --secondary: rgba(255, 255, 255, 0.09);
+
+  --accent: #0a84ff;
   --accent-foreground: #ffffff;
-  --accent-muted: rgba(139, 115, 85, 0.2);
+  --accent-muted: rgba(10, 132, 255, 0.18);
 
-  --muted: rgba(255, 255, 255, 0.05);
-  --muted-foreground: #9c9690;
-  --secondary-foreground: #6b655f;
+  --muted: rgba(255, 255, 255, 0.07);
+  --muted-foreground: #98989d;
+  --secondary-foreground: #636366;
 
-  --destructive: #d4695e;
+  --destructive: #ff453a;
   --destructive-foreground: #ffffff;
 
-  --border: rgba(255, 255, 255, 0.1);
-  --border-muted: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-muted: rgba(255, 255, 255, 0.07);
 
-  --input: #1a1a1a;
+  --input: #2c2c2e;
 
-  --ring: #a68b6a;
+  --ring: #0a84ff;
 
-  --success: #6aad7a;
-  --success-muted: rgba(106, 173, 122, 0.15);
+  --success: #30d158;
+  --success-muted: rgba(48, 209, 88, 0.14);
 
-  /* Warning (warm amber) */
-  --warning: #d4a54a;
-  --warning-foreground: #ffffff;
-  --warning-muted: rgba(212, 165, 74, 0.15);
+  --warning: #ff9f0a;
+  --warning-foreground: #1c1c1e;
+  --warning-muted: rgba(255, 159, 10, 0.14);
 
-  /* Info (muted steel blue) */
-  --info: #7a9dbd;
-  --info-foreground: #ffffff;
-  --info-muted: rgba(122, 157, 189, 0.15);
+  --info: #64d2ff;
+  --info-foreground: #1c1c1e;
+  --info-muted: rgba(100, 210, 255, 0.14);
 
-  /* Destructive muted (error banners) */
-  --destructive-muted: rgba(212, 105, 94, 0.15);
-  --destructive-border: rgba(212, 105, 94, 0.3);
+  --destructive-muted: rgba(255, 69, 58, 0.12);
+  --destructive-border: rgba(255, 69, 58, 0.3);
 
-  /* Overlay */
-  --overlay: rgba(0, 0, 0, 0.5);
+  --overlay: rgba(0, 0, 0, 0.6);
+
+  --shadow-card: 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --shadow-overlay: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
 
 html {
   scroll-behavior: smooth;
+  /* Strong curves: the built-in CSS easings are too weak for UI motion. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Controls fire immediately on tap and don't select their labels on long-press. */
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* iOS zooms into inputs under 16px and never zooms back out. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+@layer components {
+  /* Enter/exit animations from tailwindcss-animate default to a strong ease-out. */
+  .animate-in,
+  .animate-out {
+    animation-timing-function: var(--ease-out-strong);
+  }
+}
+
+/* Reduced motion keeps fades but drops movement and scaling. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .animate-out {
+    --tw-enter-scale: 1 !important;
+    --tw-exit-scale: 1 !important;
+    --tw-enter-translate-x: 0 !important;
+    --tw-enter-translate-y: 0 !important;
+    --tw-exit-translate-x: 0 !important;
+    --tw-exit-translate-y: 0 !important;
+  }
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: var(--shell);
+  /* The platform font (SF Pro on Apple devices) ships its own optical sizing and tracking. */
   font-family:
-    var(--font-geist-sans),
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
+    "SF Pro Text",
     "Segoe UI",
     Roboto,
     sans-serif;
+  font-size: 14px;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background-color: var(--accent);
-  color: white;
+  background-color: var(--accent-muted);
+  color: inherit;
 }
 
 *:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+/* Thin, unobtrusive scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }

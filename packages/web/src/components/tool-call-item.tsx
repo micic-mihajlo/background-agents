@@ -66,7 +66,7 @@ function ToolCallDetails({ event }: { event: ToolCallItemProps["event"] }) {
   const hasNonPatchArgs = !!nonPatchArgs && Object.keys(nonPatchArgs).length > 0;
 
   return (
-    <div className="min-w-0 max-w-full overflow-hidden border border-border-muted bg-card p-3 text-xs">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border-muted bg-panel p-3 font-mono text-xs">
       {event.truncated && (
         <p className="mb-2 text-muted-foreground">
           {truncatedArgs && truncatedOutput
@@ -138,10 +138,10 @@ export function ToolCallItem({ event, isExpanded, onToggle, showTime = true }: T
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full min-w-0 items-start gap-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="flex w-full min-w-0 items-start gap-1.5 text-left text-[13px] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronRightIcon
-          className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ${
+          className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
             isExpanded ? "rotate-90" : ""
           }`}
         />

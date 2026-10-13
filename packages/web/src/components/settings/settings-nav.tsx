@@ -27,14 +27,14 @@ function SettingsSearch({ value, onChange }: { value: string; onChange: (value: 
     <label className="relative block">
       <span className="sr-only">Search settings</span>
       <span aria-hidden="true">
-        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-secondary-foreground" />
       </span>
       <Input
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="Search settings"
-        className="pl-9"
+        className="pl-8"
       />
     </label>
   );
@@ -60,7 +60,7 @@ export function SettingsNav({ activeCategory, onSelect }: SettingsNavProps) {
         <section key={group.label} aria-labelledby={`settings-${group.label.toLowerCase()}`}>
           <h2
             id={`settings-${group.label.toLowerCase()}`}
-            className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+            className="mb-1 px-2 text-xs font-medium text-secondary-foreground"
           >
             {group.label}
           </h2>
@@ -68,7 +68,7 @@ export function SettingsNav({ activeCategory, onSelect }: SettingsNavProps) {
             className={
               isMobile
                 ? "divide-y divide-border-muted overflow-hidden rounded-xl border border-border-muted bg-card"
-                : "space-y-1"
+                : "space-y-px"
             }
           >
             {group.items.map((item) => {
@@ -86,10 +86,10 @@ export function SettingsNav({ activeCategory, onSelect }: SettingsNavProps) {
                     className={`h-auto w-full justify-start gap-3 whitespace-normal rounded-md text-left ${
                       isMobile
                         ? "px-4 py-3.5 text-foreground hover:bg-muted/60"
-                        : `px-3 py-2 ${
+                        : `h-8 gap-2.5 px-2 py-0 ${
                             isActive
-                              ? "bg-muted font-medium text-foreground"
-                              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                              ? "bg-card font-medium text-foreground shadow-card"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground"
                           }`
                     }`}
                   >
@@ -99,7 +99,9 @@ export function SettingsNav({ activeCategory, onSelect }: SettingsNavProps) {
                       />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium">{item.label}</span>
+                      <span className={`block font-medium ${isMobile ? "text-sm" : "text-[13px]"}`}>
+                        {item.label}
+                      </span>
                       {isMobile && (
                         <span className="mt-0.5 block text-xs text-muted-foreground">
                           {item.description}
@@ -144,12 +146,9 @@ export function SettingsNav({ activeCategory, onSelect }: SettingsNavProps) {
   }
 
   return (
-    <nav
-      aria-label="Settings"
-      className="flex w-60 shrink-0 flex-col border-r border-border-muted bg-muted/15"
-    >
-      <div className="border-b border-border-muted px-4 py-4">
-        <Button asChild variant="ghost" size="sm" className="mb-5 -ml-3 gap-2">
+    <nav aria-label="Settings" className="flex w-60 shrink-0 flex-col bg-shell">
+      <div className="px-3 pt-3 pb-2">
+        <Button asChild variant="ghost" size="sm" className="mb-3 gap-2 px-2">
           <Link href="/">
             <span aria-hidden="true">
               <BackIcon className="h-4 w-4" />
@@ -157,10 +156,12 @@ export function SettingsNav({ activeCategory, onSelect }: SettingsNavProps) {
             Back to app
           </Link>
         </Button>
-        <h1 className="mb-3 text-lg font-semibold text-foreground">Settings</h1>
+        <h1 className="mb-3 px-2 text-[15px] font-semibold tracking-tight text-foreground">
+          Settings
+        </h1>
         <SettingsSearch value={query} onChange={setQuery} />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-5">{navigation}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 pt-2 pb-5">{navigation}</div>
     </nav>
   );
 }

@@ -120,9 +120,7 @@ export function TeamDetail({ team }: { team: TeamResponse }) {
       </div>
       {message && <ErrorBanner>{message}</ErrorBanner>}
       <form onSubmit={submit} className="space-y-4 rounded-lg border border-border p-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Team details
-        </h3>
+        <h3 className="text-[13px] font-semibold text-muted-foreground">Team details</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="detail-name">Name</Label>
@@ -227,7 +225,7 @@ export function TeamDetail({ team }: { team: TeamResponse }) {
         </Button>
       </form>
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <h3 className="text-[13px] font-semibold text-muted-foreground">
           Members - {team.memberCount}
         </h3>
         {loading ? (

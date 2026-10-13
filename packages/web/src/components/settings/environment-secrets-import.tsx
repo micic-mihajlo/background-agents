@@ -113,7 +113,7 @@ export function EnvironmentSecretsImport({
         }))}
         dropdownWidth="w-72"
         disabled={disabled || importing}
-        triggerClassName="flex items-center gap-1.5 px-3 py-2 text-sm border border-border bg-input text-foreground hover:border-foreground/20 transition"
+        triggerClassName="flex items-center gap-1.5 rounded-md shadow-card px-3 py-2 text-sm border border-border bg-input text-foreground hover:border-foreground/20 transition"
       >
         <RepoIcon className="w-4 h-4 text-muted-foreground" />
         <span className="truncate flex-1 text-left">{sourceKey || "Select source repository"}</span>

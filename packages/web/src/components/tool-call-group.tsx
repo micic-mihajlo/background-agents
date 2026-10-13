@@ -66,10 +66,10 @@ export const ToolCallGroup = memo(
         <button
           type="button"
           onClick={onToggleGroup}
-          className="-mx-2 flex w-full min-w-0 items-start gap-2 px-2 py-1 text-left text-sm transition-colors hover:bg-muted"
+          className="-mx-2 flex w-full min-w-0 items-start gap-2 rounded-md px-2 py-1 text-left text-[13px] transition-colors hover:bg-muted"
         >
           <ChevronRightIcon
-            className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ${
+            className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
               isExpanded ? "rotate-90" : ""
             }`}
           />
@@ -81,7 +81,7 @@ export const ToolCallGroup = memo(
         </button>
 
         {isExpanded && (
-          <div className="ml-2 mt-1 border-l-2 border-border pl-2 sm:ml-4">
+          <div className="ml-2 mt-1 border-l border-border pl-2 sm:ml-4">
             {events.map((event) => (
               <ToolCallItem
                 key={toolCallKey(event)}

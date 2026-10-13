@@ -77,9 +77,7 @@ export function ModelsSettings() {
           return (
             <div key={group.category}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-foreground uppercase tracking-wider">
-                  {group.category}
-                </h3>
+                <h3 className="text-sm font-medium text-foreground">{group.category}</h3>
                 <Button
                   type="button"
                   variant="subtle"
@@ -97,7 +95,7 @@ export function ModelsSettings() {
                     <label
                       key={model.id}
                       htmlFor={`model-toggle-${model.id}`}
-                      className="flex items-center justify-between px-4 py-3 border border-border hover:bg-muted/50 transition cursor-pointer"
+                      className="rounded-lg flex items-center justify-between px-4 py-3 border border-border hover:bg-muted/50 transition cursor-pointer"
                     >
                       <div>
                         <span className="text-sm font-medium text-foreground">{model.name}</span>

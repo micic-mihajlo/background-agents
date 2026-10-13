@@ -157,7 +157,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       <AppShellActionsContext.Provider value={appShellActions}>
         <div
           data-testid="mobile-sidebar-gesture-boundary"
-          className={`flex h-dvh overflow-hidden ${
+          className={`flex h-dvh overflow-hidden bg-shell ${
             isMobile && !sidebar.isOpen ? "touch-pan-y" : ""
           }`}
           onPointerDownCapture={sidebarPull.handlePointerDown}
@@ -189,10 +189,12 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             data-testid="mobile-sidebar-drawer"
             className={
               isMobile
-                ? `fixed inset-y-0 left-0 z-40 w-72 ease-in-out ${
-                    sidebarPull.isDragging ? "" : "transition-transform duration-200"
+                ? `fixed inset-y-0 left-0 z-40 w-72 ease-drawer ${
+                    sidebarPull.isDragging
+                      ? ""
+                      : "transition-transform duration-300 motion-reduce:transition-none"
                   } ${sidebar.isOpen ? "translate-x-0" : "-translate-x-full"}`
-                : `transition-all duration-200 ease-in-out ${
+                : `transition-[width] duration-200 ease-in-out-strong motion-reduce:transition-none ${
                     sidebar.isOpen ? "w-72" : "w-0"
                   } flex-shrink-0 overflow-hidden`
             }
@@ -209,7 +211,17 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               onSessionSelect={sidebar.close}
             />
           </div>
-          <main className="min-w-0 flex-1 overflow-hidden">{children}</main>
+          <main
+            className={`min-w-0 flex-1 overflow-hidden bg-background ${
+              isMobile
+                ? ""
+                : `my-2 mr-2 rounded-lg border border-border-muted shadow-card ${
+                    sidebar.isOpen ? "" : "ml-2"
+                  }`
+            }`}
+          >
+            {children}
+          </main>
         </div>
         <GlobalCommandMenu
           open={isCommandMenuOpen}

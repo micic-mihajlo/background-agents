@@ -28,9 +28,7 @@ export function SkillAssignments({
         </ScopeCheckbox>
         {repos.length > 0 && (
           <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Repositories
-            </p>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Repositories</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {repos.map((repo) => {
                 const key = `repository:${repo.owner}/${repo.name}`;
@@ -49,9 +47,7 @@ export function SkillAssignments({
         )}
         {environments.length > 0 && (
           <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Environments
-            </p>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Environments</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {environments.map((environment) => {
                 const key = `environment:${environment.id}`;

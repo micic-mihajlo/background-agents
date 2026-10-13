@@ -97,10 +97,7 @@ describe("GlobalCommandMenu", () => {
     expect(home).toHaveAttribute("aria-selected", "true");
     expect(home).toHaveClass(
       "data-[selected=true]:bg-muted",
-      "data-[selected=true]:text-foreground",
-      "data-[selected=true]:ring-2",
-      "data-[selected=true]:ring-inset",
-      "data-[selected=true]:ring-ring"
+      "data-[selected=true]:text-foreground"
     );
     expect(home).not.toHaveClass("data-[selected=true]:bg-accent");
 
@@ -110,10 +107,7 @@ describe("GlobalCommandMenu", () => {
     expect(home).toHaveAttribute("aria-selected", "false");
     expect(newSession).toHaveClass(
       "data-[selected=true]:bg-muted",
-      "data-[selected=true]:text-foreground",
-      "data-[selected=true]:ring-2",
-      "data-[selected=true]:ring-inset",
-      "data-[selected=true]:ring-ring"
+      "data-[selected=true]:text-foreground"
     );
     expect(screen.getByText("Start a coding session")).toHaveClass("text-muted-foreground");
     expect(screen.getByText("Cmd/Ctrl+Shift+O")).toHaveClass("text-muted-foreground");

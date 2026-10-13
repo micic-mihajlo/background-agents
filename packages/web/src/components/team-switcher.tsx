@@ -21,7 +21,7 @@ export function TeamSwitcher({ onNavigate }: { onNavigate?: () => void }) {
         <SelectTrigger
           aria-label="Active team"
           density="compact"
-          className="h-8 min-w-0 flex-1 border-transparent bg-transparent"
+          className="h-8 min-w-0 flex-1 text-[13px] font-medium"
         >
           <SelectValue />
         </SelectTrigger>

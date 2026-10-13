@@ -74,7 +74,10 @@ export function TeamsIndex() {
 
   return (
     <section aria-labelledby="teams-heading">
-      <h1 id="teams-heading" className="text-2xl font-semibold text-foreground sm:text-3xl">
+      <h1
+        id="teams-heading"
+        className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
+      >
         Teams
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">

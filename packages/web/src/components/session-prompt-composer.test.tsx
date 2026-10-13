@@ -198,10 +198,11 @@ describe("SessionPromptComposer", () => {
       screen.getByTitle("Stop current prompt; queued prompts will continue")
     ).toBeInTheDocument();
     expect(screen.getByTitle("Queue follow-up; runs after the current prompt")).toBeDisabled();
-    expect(input).toHaveClass("min-w-48", "flex-1");
+    // The textarea spans the composer; send controls sit in the toolbar row below it.
+    expect(input).toHaveClass("w-full");
     expect(input).not.toHaveClass("pr-24");
-    expect(input.parentElement).toHaveClass("flex-wrap", "justify-end");
-    expect(actions).toHaveClass("shrink-0", "sm:absolute");
+    expect(actions).toHaveClass("shrink-0");
+    expect(actions).not.toContainElement(input);
   });
 
   it("keeps model controls editable while processing and blocks terminal sessions", () => {

@@ -34,11 +34,11 @@ export function GitHubAutofixFeedbackCard({
   const reviewBodyKey = `${messageId}:review-body`;
 
   return (
-    <div className="border border-border bg-card">
+    <div className="rounded-lg border border-border bg-card">
       <div className="border-l-2 border-accent p-3 sm:p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+            <div className="text-[11px] font-semibold tracking-[0.14em] text-accent">
               GitHub feedback
             </div>
             <h3 className="mt-1 text-sm font-semibold">
@@ -166,7 +166,7 @@ function ReviewThreads({
 
   return (
     <div className="border-t border-border-muted p-3 sm:p-4">
-      <div className="mb-2 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="mb-2 flex items-center gap-3 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground">
         <span>{formatCommentCount(comments.length)}</span>
         <span aria-hidden="true" className="h-px flex-1 bg-border" />
       </div>
@@ -208,7 +208,7 @@ function ReviewThread({
   const threadUrl = getSafeExternalUrl(comment.url);
 
   return (
-    <article className="border border-border bg-card">
+    <article className="rounded-lg border border-border bg-card">
       <button
         type="button"
         onClick={onToggle}

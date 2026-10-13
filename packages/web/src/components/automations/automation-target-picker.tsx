@@ -250,7 +250,7 @@ export function AutomationTargetPicker({
             filterFn={(option, branchQuery) => option.label.toLowerCase().includes(branchQuery)}
             dropdownWidth="w-56"
             disabled={!selectedRepository || loadingBranches}
-            triggerClassName="flex w-full items-center gap-1.5 px-3 py-2 text-sm border border-border bg-input text-foreground hover:border-foreground/20 transition"
+            triggerClassName="flex w-full items-center gap-1.5 rounded-md shadow-card px-3 py-2 text-sm border border-border bg-input text-foreground hover:border-foreground/20 transition"
           >
             <BranchIcon className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="truncate flex-1 text-left">

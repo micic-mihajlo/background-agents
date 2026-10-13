@@ -140,7 +140,7 @@ export function SessionVisibilityControl({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-4">
-        <label htmlFor={`${id}-visibility`} className="text-sm font-medium">
+        <label htmlFor={`${id}-visibility`} className="text-[13px] font-semibold">
           Visibility
         </label>
         <Select

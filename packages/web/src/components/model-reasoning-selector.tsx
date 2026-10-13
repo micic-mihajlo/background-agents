@@ -80,7 +80,7 @@ export function ModelReasoningSelector({
         <button
           type="button"
           disabled={disabled}
-          className="flex max-w-full items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-7 max-w-full items-center gap-1.5 rounded-md px-2 text-[13px] text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={triggerLabel}
         >
           {harness && harnessLabel && (
@@ -270,7 +270,7 @@ function ModelOptions({
       {items.map((group, groupIndex) => (
         <Fragment key={group.category}>
           {groupIndex > 0 && <DropdownMenuSeparator />}
-          <DropdownMenuLabel className="text-xs uppercase tracking-wider text-secondary-foreground">
+          <DropdownMenuLabel className="text-xs text-secondary-foreground">
             {group.category}
           </DropdownMenuLabel>
           {group.models.map((model) => (

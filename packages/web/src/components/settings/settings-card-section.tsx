@@ -11,9 +11,7 @@ export function SettingsCardSection({
 }) {
   return (
     <section className="mb-5 rounded-md border border-border-muted p-5">
-      <h3 className="mb-1 text-sm font-semibold uppercase tracking-wider text-foreground">
-        {title}
-      </h3>
+      <h3 className="mb-1 text-[13px] font-semibold text-foreground">{title}</h3>
       <p className="mb-4 text-sm text-muted-foreground">{description}</p>
       {children}
     </section>

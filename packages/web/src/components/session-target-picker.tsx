@@ -2,7 +2,7 @@
 
 import { RepositoryMultiSelect } from "@/components/repository-multi-select";
 import { Combobox } from "@/components/ui/combobox";
-import { ChevronDownIcon } from "@/components/ui/icons";
+import { BranchIcon, ChevronDownIcon, RepoIcon } from "@/components/ui/icons";
 import type { SessionTargetPickerProps } from "@/hooks/use-session-target-picker";
 
 /**
@@ -44,12 +44,13 @@ export function SessionTargetPicker({
         direction="down"
         dropdownWidth="w-72"
         disabled={disabled || loadingRepos}
-        triggerClassName="flex max-w-full items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition"
+        triggerClassName="flex h-7 max-w-full items-center gap-1.5 rounded-md border border-border-muted bg-card px-2.5 text-[13px] font-medium text-foreground/80 shadow-card transition hover:border-border hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
       >
+        <RepoIcon className="h-3.5 w-3.5 shrink-0 text-secondary-foreground" />
         <span className="truncate max-w-[12rem] sm:max-w-none">
           {loadingRepos ? "Loading..." : displayTargetName}
         </span>
-        <ChevronDownIcon className="w-3 h-3" />
+        <ChevronDownIcon className="w-3 h-3 shrink-0 text-secondary-foreground" />
       </Combobox>
 
       {repositoryGrantError && (
@@ -107,12 +108,13 @@ export function SessionTargetPicker({
           direction="down"
           dropdownWidth="w-56"
           disabled={disabled || loadingBranches || loadingRepos || !!selectionError}
-          triggerClassName="flex max-w-full items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition"
+          triggerClassName="flex h-7 max-w-full items-center gap-1.5 rounded-md border border-border-muted bg-card px-2.5 text-[13px] font-medium text-foreground/80 shadow-card transition hover:border-border hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
         >
+          <BranchIcon className="h-3.5 w-3.5 shrink-0 text-secondary-foreground" />
           <span className="max-w-[9rem] truncate">
             {loadingBranches ? "Loading..." : selectedBranch || "branch"}
           </span>
-          <ChevronDownIcon className="w-3 h-3" />
+          <ChevronDownIcon className="w-3 h-3 shrink-0 text-secondary-foreground" />
         </Combobox>
       )}
     </>

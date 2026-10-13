@@ -16,6 +16,7 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { isUnarchivedSessionListKey } from "@/lib/session-list";
 import { isSessionInboxKey } from "@/lib/session-inbox-api";
 import { APP_NAME } from "@/lib/site-config";
+import { AppIcon } from "@/components/ui/app-icon";
 import type { SessionAttachmentReference } from "@open-inspect/shared/types/session-attachments";
 import { MAX_WEB_PROMPT_CHARS } from "@open-inspect/shared/types/websocket";
 import {
@@ -628,21 +629,27 @@ function HomeContent({
         </header>
       )}
 
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
-        <div className="w-full max-w-2xl">
+      <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-4 py-8 sm:px-8">
+        <div className="w-full max-w-[44rem] -mt-[8vh]">
           {/* Welcome text */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold text-foreground mb-2">Welcome to {APP_NAME}</h1>
+          <div className="text-center mb-7">
+            <div className="mx-auto mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+              <AppIcon className="h-5 w-5" />
+            </div>
+            <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-foreground mb-1.5">
+              What should we build?
+            </h1>
+            <p className="sr-only">Welcome to {APP_NAME}</p>
             {isAuthenticated && canCreateSession ? (
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Ask a question or describe what you want to build
               </p>
             ) : isAuthenticated ? (
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 You don&apos;t have permission to create sessions.
               </p>
             ) : (
-              <p className="text-muted-foreground">Sign in to start a new session</p>
+              <p className="text-sm text-muted-foreground">Sign in to start a new session</p>
             )}
           </div>
 
@@ -662,12 +669,12 @@ function HomeContent({
                 </p>
               ) : null}
 
-              <div className="mb-3 flex flex-wrap items-center gap-2 px-4 sm:gap-4">
+              <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
                 <SessionTargetPicker {...picker.pickerProps} disabled={creating} />
               </div>
 
               <div
-                className={`border border-border bg-input ${isDraggingOver ? "ring-2 ring-accent" : ""}`}
+                className={`relative rounded-xl border border-border bg-card shadow-card transition focus-within:border-foreground/20 focus-within:shadow-overlay ${isDraggingOver ? "ring-2 ring-accent" : ""}`}
                 onPaste={handlePaste}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -688,64 +695,34 @@ function HomeContent({
                   onChange={handleFileInputChange}
                 />
                 {/* Text input area */}
-                <div className="relative">
-                  <PromptSkillTextarea
-                    ref={inputRef}
-                    value={prompt}
-                    suggestions={skillSuggestions}
-                    onValueChange={handlePromptChange}
-                    onKeyDown={handleKeyDown}
-                    maxLength={MAX_WEB_PROMPT_CHARS}
-                    disabled={creating}
-                    placeholder="What do you want to build?"
-                    autoFocus
-                    autoComplete="off"
-                    className="w-full resize-none bg-transparent px-4 pt-4 pb-12 focus:outline-none text-foreground placeholder:text-secondary-foreground disabled:opacity-50"
-                    rows={3}
-                  />
-                  {/* Submit button */}
-                  <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                    {isCreatingSession && (
-                      <span className="whitespace-nowrap text-xs text-accent">
-                        Warming sandbox...
-                      </span>
-                    )}
+                <PromptSkillTextarea
+                  ref={inputRef}
+                  value={prompt}
+                  suggestions={skillSuggestions}
+                  onValueChange={handlePromptChange}
+                  onKeyDown={handleKeyDown}
+                  maxLength={MAX_WEB_PROMPT_CHARS}
+                  disabled={creating}
+                  placeholder="What do you want to build?"
+                  autoFocus
+                  autoComplete="off"
+                  className="block w-full min-h-[96px] resize-none bg-transparent px-4 pt-3.5 pb-2 text-[15px] leading-6 text-foreground placeholder:text-secondary-foreground focus:outline-none disabled:opacity-50"
+                  rows={3}
+                />
+
+                {/* Agent configuration stays inside the composer. */}
+                <div className="flex items-end gap-2 px-2 pb-2">
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={attachmentsLocked}
-                      className="p-2 text-secondary-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition"
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,transform] duration-150 ease-out-strong hover:bg-muted hover:text-foreground active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-30"
                       title="Attach images"
                       aria-label="Attach images"
                     >
-                      <PaperclipIcon className="w-5 h-5" />
+                      <PaperclipIcon className="h-4 w-4" />
                     </button>
-                    <button
-                      type="submit"
-                      disabled={
-                        (!prompt.trim() && attachments.items.length === 0) ||
-                        attachmentsLocked ||
-                        !providerSelectionsHydrated ||
-                        providerAccounts.loading ||
-                        !isLaunchable ||
-                        !teamCreationReady
-                      }
-                      className="p-2 text-secondary-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition"
-                      title={`Send (${labels["send-prompt"]})`}
-                      aria-label={`Send (${labels["send-prompt"]})`}
-                    >
-                      {creating ? (
-                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <SendIcon className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Agent configuration stays inside the composer. */}
-                <div className="flex flex-col gap-2 px-4 py-2 border-t border-border-muted sm:flex-row sm:items-center sm:gap-0">
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 min-w-0">
                     <ModelReasoningSelector
                       selectedModel={selectedModel}
                       reasoningEffort={reasoningEffort}
@@ -783,6 +760,34 @@ function HomeContent({
                       />
                     )}
                   </div>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    {isCreatingSession && (
+                      <span className="whitespace-nowrap text-xs text-muted-foreground">
+                        Warming sandbox...
+                      </span>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={
+                        (!prompt.trim() && attachments.items.length === 0) ||
+                        attachmentsLocked ||
+                        !providerSelectionsHydrated ||
+                        providerAccounts.loading ||
+                        !isLaunchable ||
+                        !teamCreationReady
+                      }
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10 transition-[background-color,box-shadow,transform] duration-150 ease-out-strong hover:bg-accent/90 active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-muted disabled:text-secondary-foreground disabled:shadow-none disabled:ring-0"
+                      title={`Send (${labels["send-prompt"]})`}
+                      aria-label={`Send (${labels["send-prompt"]})`}
+                    >
+                      {creating ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <SendIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -799,13 +804,13 @@ function HomeContent({
 
               {/* Secrets disclosure per session target (design §7.4) */}
               {sessionTarget?.kind === "environment" && (
-                <p className="mt-3 text-xs text-muted-foreground text-center">
+                <p className="mt-3 text-xs text-secondary-foreground text-center">
                   Sessions from this environment use global secrets plus the environment&apos;s
                   secrets.
                 </p>
               )}
               {sessionTarget?.kind === "repos" && (
-                <p className="mt-3 text-xs text-muted-foreground text-center">
+                <p className="mt-3 text-xs text-secondary-foreground text-center">
                   Ad-hoc sessions use global secrets plus the selected repositories&apos; secrets,
                   and don&apos;t get prebuilt images —{" "}
                   <Link href="/settings?tab=environments" className="text-accent hover:underline">

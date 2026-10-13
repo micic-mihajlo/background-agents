@@ -8,7 +8,7 @@ const PR_STATE_TEXT_CLASS = {
 } as const;
 
 export const badgeVariants = cva(
-  "inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium",
+  "inline-flex h-5 items-center gap-1 rounded-sm px-1.5 text-xs font-medium",
   {
     variants: {
       variant: {
@@ -18,7 +18,7 @@ export const badgeVariants = cva(
         "pr-draft": `bg-muted ${PR_STATE_TEXT_CLASS.draft}`,
         "pr-open": `bg-accent-muted ${PR_STATE_TEXT_CLASS.open}`,
         info: "bg-info-muted text-info border border-info/20",
-        kbd: "font-mono text-muted-foreground border border-border bg-input rounded",
+        kbd: "h-[18px] bg-muted px-1 font-sans text-[11px] text-muted-foreground",
       },
     },
     defaultVariants: {

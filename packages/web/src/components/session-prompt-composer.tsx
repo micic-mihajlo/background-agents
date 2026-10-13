@@ -100,8 +100,8 @@ export function SessionPromptComposer({
   }, [prompt.inputRef, prompt.value]);
 
   return (
-    <footer className="min-w-0 border-t border-border-muted flex-shrink-0">
-      <form onSubmit={prompt.onSubmit} className="w-full min-w-0 max-w-4xl mx-auto p-4 pb-6">
+    <footer className="min-w-0 flex-shrink-0">
+      <form onSubmit={prompt.onSubmit} className="w-full min-w-0 max-w-3xl mx-auto px-4 pt-2 pb-4">
         {/* Action bar above input */}
         <div className="hidden mb-3 md:block">
           <ActionBar
@@ -117,7 +117,9 @@ export function SessionPromptComposer({
 
         {/* Input container */}
         <div
-          className={`border bg-input ${isDraggingOver ? "border-accent" : "border-border"}`}
+          className={`relative overflow-hidden rounded-xl border bg-card shadow-card transition focus-within:border-foreground/20 focus-within:shadow-overlay ${
+            isDraggingOver ? "border-accent" : "border-border"
+          }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -130,30 +132,24 @@ export function SessionPromptComposer({
             disabled={attachmentsLocked}
           />
 
-          {/* Text input area with floating send button */}
-          <div className="relative flex flex-wrap items-end justify-end sm:block">
-            <PromptSkillTextarea
-              ref={prompt.inputRef}
-              value={prompt.value}
-              suggestions={skillSuggestions}
-              onValueChange={prompt.onValueChange}
-              onKeyDown={prompt.onKeyDown}
-              maxLength={MAX_WEB_PROMPT_CHARS}
-              disabled={prompt.draftLocked}
-              onPaste={handlePaste}
-              autoComplete="off"
-              placeholder={prompt.isProcessing ? "Add a follow-up..." : "Ask or build anything"}
-              className="min-h-12 max-h-40 w-0 min-w-48 flex-1 resize-none overflow-y-auto bg-transparent px-4 py-3 leading-6 text-foreground placeholder:text-secondary-foreground focus:outline-none sm:block sm:min-h-[7.75rem] sm:w-full sm:px-4 sm:pt-4 sm:pb-12"
-              rows={1}
-            />
-            {/* Floating action buttons */}
-            <div
-              data-testid="prompt-actions"
-              className="flex shrink-0 items-center gap-1 pb-1.5 pr-2 sm:absolute sm:bottom-3 sm:right-3 sm:gap-2 sm:p-0"
-            >
-              {attachments.isUploading && (
-                <span className="whitespace-nowrap text-xs text-muted-foreground">Uploading…</span>
-              )}
+          <PromptSkillTextarea
+            ref={prompt.inputRef}
+            value={prompt.value}
+            suggestions={skillSuggestions}
+            onValueChange={prompt.onValueChange}
+            onKeyDown={prompt.onKeyDown}
+            maxLength={MAX_WEB_PROMPT_CHARS}
+            disabled={prompt.draftLocked}
+            onPaste={handlePaste}
+            autoComplete="off"
+            placeholder={prompt.isProcessing ? "Add a follow-up..." : "Ask or build anything"}
+            className="block min-h-12 max-h-40 w-full resize-none overflow-y-auto bg-transparent px-4 pt-3 pb-1 leading-6 text-foreground placeholder:text-secondary-foreground focus:outline-none sm:min-h-[4.5rem]"
+            rows={1}
+          />
+
+          {/* Toolbar: agent/model control on the left, send controls on the right */}
+          <div className="flex items-center gap-2 px-2 pb-2">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -166,48 +162,12 @@ export function SessionPromptComposer({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={attachmentsLocked}
-                className="p-2 text-secondary-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,transform] duration-150 ease-out-strong hover:bg-muted hover:text-foreground active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-30"
                 title="Attach images"
                 aria-label="Attach images"
               >
-                <PaperclipIcon className="w-5 h-5" />
+                <PaperclipIcon className="h-4 w-4" />
               </button>
-              {prompt.isProcessing && session.capabilities.lifecycle && (
-                <button
-                  type="button"
-                  onClick={prompt.onStopExecution}
-                  className="p-2 text-destructive hover:bg-destructive-muted transition"
-                  title="Stop current prompt; queued prompts will continue"
-                  aria-label="Stop current prompt; queued prompts will continue"
-                >
-                  <StopIcon className="w-5 h-5" />
-                </button>
-              )}
-              <button
-                type="submit"
-                disabled={sendDisabled}
-                className="flex items-center gap-1 p-2 text-secondary-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition"
-                title={
-                  prompt.isProcessing
-                    ? "Queue follow-up; runs after the current prompt"
-                    : `Send (${labels["send-prompt"]})`
-                }
-                aria-label={
-                  prompt.isProcessing
-                    ? "Queue follow-up; runs after the current prompt"
-                    : `Send (${labels["send-prompt"]})`
-                }
-              >
-                {prompt.isProcessing && <span className="text-xs font-medium">Queue</span>}
-                <SendIcon className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Footer row with the agent/model control */}
-          <div className="flex flex-col gap-2 px-4 py-2 border-t border-border-muted sm:flex-row sm:items-center sm:justify-between sm:gap-0">
-            {/* Left side - Model controls */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4 min-w-0">
               <ModelReasoningSelector
                 selectedModel={model.selectedModel}
                 reasoningEffort={model.reasoningEffort}
@@ -219,9 +179,42 @@ export function SessionPromptComposer({
               />
             </div>
 
-            {/* Right side - Agent label */}
-            <span className="hidden sm:inline text-sm text-muted-foreground">build agent</span>
+            <div data-testid="prompt-actions" className="flex shrink-0 items-center gap-1.5">
+              {attachments.isUploading && (
+                <span className="whitespace-nowrap text-xs text-muted-foreground">Uploading…</span>
+              )}
+              {prompt.isProcessing && session.capabilities.lifecycle && (
+                <button
+                  type="button"
+                  onClick={prompt.onStopExecution}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-foreground shadow-card transition-[background-color,transform] duration-150 ease-out-strong hover:bg-muted active:scale-[0.94]"
+                  title="Stop current prompt; queued prompts will continue"
+                  aria-label="Stop current prompt; queued prompts will continue"
+                >
+                  <StopIcon className="h-3.5 w-3.5" />
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={sendDisabled}
+                className="flex h-8 min-w-8 items-center justify-center gap-1 rounded-lg bg-accent px-2 text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10 transition-[background-color,box-shadow,transform] duration-150 ease-out-strong hover:bg-accent/90 active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-muted disabled:text-secondary-foreground disabled:shadow-none disabled:ring-0"
+                title={
+                  prompt.isProcessing
+                    ? "Queue follow-up; runs after the current prompt"
+                    : `Send (${labels["send-prompt"]})`
+                }
+                aria-label={
+                  prompt.isProcessing
+                    ? "Queue follow-up; runs after the current prompt"
+                    : `Send (${labels["send-prompt"]})`
+                }
+              >
+                {prompt.isProcessing && <span className="pl-0.5 text-xs font-medium">Queue</span>}
+                <SendIcon className="h-4 w-4" />
+              </button>
+            </div>
           </div>
+
           {prompt.submitError && (
             <p
               role="alert"

@@ -95,7 +95,7 @@ export function MemoriesSection({ sessionId }: { sessionId: string }) {
           {groups.length === 0 && <p className="text-muted-foreground">No memories were loaded.</p>}
           {groups.map((group) => (
             <div key={memoryScopeDisplayKey(group.scope)}>
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-secondary-foreground">
+              <p className="mb-1 text-[11px] font-medium text-secondary-foreground">
                 {memoryScopeLabel(group.scope)} · {group.items.length}
               </p>
               <ul className="space-y-1.5">

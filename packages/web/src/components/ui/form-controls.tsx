@@ -17,7 +17,7 @@ export function RadioCard({
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-start gap-2 rounded-sm border px-3 py-2 text-sm transition",
+        "flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 text-sm transition",
         disabled
           ? "cursor-not-allowed border-border-muted bg-muted/30 opacity-60"
           : checked

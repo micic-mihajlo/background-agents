@@ -32,12 +32,10 @@ export function PromptSkillSuggestionPanel({
   return (
     <div
       data-testid="prompt-skill-suggestions"
-      className="absolute bottom-full left-0 right-0 z-50 mb-3 overflow-hidden rounded-xl border border-border bg-background p-2 shadow-2xl"
+      className="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-xl border border-border bg-popover p-1.5 shadow-overlay"
     >
       <div className="flex items-center justify-between gap-4 px-3 py-2">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Skills
-        </span>
+        <span className="text-xs font-medium text-muted-foreground">Skills</span>
         <span className="text-xs text-muted-foreground">
           {source.status === "loading"
             ? "Loading..."

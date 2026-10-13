@@ -37,7 +37,7 @@ import {
 import { toUiArtifactMetadata } from "@/lib/session-socket/artifact-metadata";
 import type { SandboxEvent } from "@/types/session";
 import type { SessionParticipantProfile } from "@open-inspect/shared/types/sessions";
-import { CheckIcon, CopyIcon, ErrorIcon } from "@/components/ui/icons";
+import { CheckIcon, CopyIcon, ErrorIcon, SparkleIcon } from "@/components/ui/icons";
 import { resolveParticipantDisplay } from "@/lib/participant-display";
 import { cn } from "@/lib/utils";
 import type { PromptQueueItem } from "@open-inspect/shared/types/server-messages";
@@ -279,7 +279,7 @@ export function SessionTimeline({
       // absolutely-positioned descendants (e.g. sr-only live-status spans in
       // task rows). Without it they anchor to the document, escape every
       // ancestor overflow clip, and grow the page itself.
-      className="relative h-full overflow-y-auto overflow-x-hidden p-3 [overflow-anchor:none] sm:p-4"
+      className="relative h-full overflow-y-auto overflow-x-hidden px-3 py-4 [overflow-anchor:none] sm:px-6 sm:py-6"
     >
       <div className="relative w-full min-w-0 max-w-3xl mx-auto">
         {showSkeleton ? (
@@ -309,9 +309,9 @@ export function SessionTimeline({
 
 function ThinkingIndicator() {
   return (
-    <div className="bg-card p-4 flex items-center gap-2">
-      <span className="inline-block w-2 h-2 bg-accent rounded-full animate-pulse" />
-      <span className="text-sm text-muted-foreground">Thinking...</span>
+    <div className="flex items-center gap-2 px-1 py-3">
+      <span className="inline-block w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+      <span className="text-[13px] font-medium text-muted-foreground">Thinking...</span>
     </div>
   );
 }
@@ -319,16 +319,16 @@ function ThinkingIndicator() {
 function TimelineSkeleton() {
   return (
     <div className="space-y-3 py-2 animate-pulse">
-      <div className="bg-card p-3 space-y-2 sm:p-4">
+      <div className="rounded-lg bg-panel p-3 space-y-2 sm:p-4">
         <div className="h-3 w-24 bg-muted rounded" />
         <div className="h-3 w-full bg-muted rounded" />
         <div className="h-3 w-5/6 bg-muted rounded" />
       </div>
-      <div className="bg-accent-muted p-3 space-y-2 sm:ml-8 sm:p-4">
+      <div className="rounded-lg bg-muted/60 p-3 space-y-2 sm:p-4">
         <div className="h-3 w-20 bg-muted rounded" />
         <div className="h-3 w-4/5 bg-muted rounded" />
       </div>
-      <div className="bg-card p-3 space-y-2 sm:p-4">
+      <div className="rounded-lg bg-panel p-3 space-y-2 sm:p-4">
         <div className="h-3 w-32 bg-muted rounded" />
         <div className="h-3 w-3/4 bg-muted rounded" />
       </div>
@@ -393,7 +393,7 @@ function MessageFrame({
 }: MessageFrameProps) {
   return (
     <div className={`min-w-0 ${className}`}>
-      <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
+      <div className="mb-1.5 flex min-w-0 items-center justify-between gap-2">
         {label}
         <div className="flex shrink-0 items-center gap-1.5">
           <CopyButton
@@ -464,7 +464,7 @@ function UserMessageAttachments({
             title={attachment.name}
             loading="lazy"
             decoding="async"
-            className="block h-auto max-h-48 max-w-full border border-border object-contain"
+            className="block h-auto max-h-48 max-w-full rounded-md border border-border object-contain"
           />
         );
       })}
@@ -515,17 +515,24 @@ function UserMessageEvent({
     <MessageFrame
       label={
         <div className="flex min-w-0 items-center gap-2">
-          {!isCurrentUser && avatar && (
-            <img src={avatar} alt={authorName} className="w-5 h-5 rounded-full" />
+          {avatar ? (
+            <img src={avatar} alt={authorName} className="h-[18px] w-[18px] rounded-full" />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-accent-muted text-[10px] font-semibold text-accent"
+            >
+              {authorName.charAt(0).toUpperCase()}
+            </span>
           )}
-          <span className="text-xs text-accent">{authorName}</span>
+          <span className="text-[13px] font-medium text-foreground/80">{authorName}</span>
         </div>
       }
       time={formatEventTime(event)}
       copied={copied}
       content={autofixFeedback ? formatGitHubAutofixFeedbackMarkdown(autofixFeedback) : rawContent}
-      className="group bg-accent-muted p-3 sm:ml-8 sm:p-4"
-      copyButtonClassName="p-1 text-secondary-foreground hover:text-foreground hover:bg-muted/60 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto transition-colors"
+      className="group my-1 rounded-lg border border-border-muted bg-panel px-3 py-2.5 shadow-card sm:px-3.5"
+      copyButtonClassName="rounded-md p-1 text-secondary-foreground hover:text-foreground hover:bg-muted opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto transition-colors"
       onCopyContent={onCopyContent}
     >
       {event.origin && (
@@ -564,7 +571,7 @@ function UserMessageEvent({
           <pre
             tabIndex={boundedRawAutofix ? 0 : undefined}
             className={cn(
-              "whitespace-pre-wrap text-sm text-foreground [overflow-wrap:anywhere]",
+              "whitespace-pre-wrap font-sans text-sm leading-6 text-foreground [overflow-wrap:anywhere]",
               boundedRawAutofix &&
                 "max-h-96 overflow-auto focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
             )}
@@ -585,15 +592,25 @@ function AssistantMessageEvent({ event, copied, onCopyContent }: EventRendererPr
 
   return (
     <MessageFrame
-      label={<span className="text-xs text-muted-foreground">Assistant</span>}
+      label={
+        <span className="flex items-center gap-1.5 text-[13px] font-medium text-accent">
+          <span
+            aria-hidden="true"
+            className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-accent text-accent-foreground"
+          >
+            <SparkleIcon className="h-2.5 w-2.5" />
+          </span>
+          Assistant
+        </span>
+      }
       time={formatEventTime(event)}
       copied={copied}
       content={event.content}
-      className="group bg-card p-3 sm:p-4"
-      copyButtonClassName="p-1 text-secondary-foreground hover:text-foreground hover:bg-muted opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto transition-colors"
+      className="group px-1 py-2"
+      copyButtonClassName="rounded-md p-1 text-secondary-foreground hover:text-foreground hover:bg-muted opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto transition-colors"
       onCopyContent={onCopyContent}
     >
-      <SafeMarkdown content={event.content} className="text-sm" linkRepositoryFiles />
+      <SafeMarkdown content={event.content} className="text-sm leading-6" linkRepositoryFiles />
     </MessageFrame>
   );
 }
@@ -623,7 +640,7 @@ function ArtifactEvent({ event, sessionId, onOpenMedia }: EventRendererProps) {
   if (event.type !== "artifact") return null;
 
   return (
-    <div className="space-y-2 border border-border-muted bg-card p-3 sm:p-4">
+    <div className="space-y-2 rounded-lg border border-border-muted bg-card p-3 shadow-card sm:p-4">
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
           {event.artifactType === "video" ? "Video" : "Screenshot"}

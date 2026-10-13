@@ -448,7 +448,10 @@ export function SecretsEditor({
 
           <div className="space-y-2">
             {rows.map((row) => (
-              <div key={row.id} className="flex flex-col gap-2 border border-border-muted p-2">
+              <div
+                key={row.id}
+                className="rounded-lg flex flex-col gap-2 border border-border-muted p-2"
+              >
                 <div className="flex flex-wrap gap-2">
                   <Input
                     type="text"
@@ -516,7 +519,7 @@ export function SecretsEditor({
                   return (
                     <div
                       key={g.key}
-                      className={`flex flex-wrap items-center gap-2 border border-border-muted p-2 ${
+                      className={`flex flex-wrap items-center gap-2 rounded-lg border border-border-muted p-2 ${
                         overridden ? "opacity-40" : "opacity-70"
                       }`}
                     >

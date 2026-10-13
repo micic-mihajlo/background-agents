@@ -214,9 +214,16 @@ export function SessionRightSidebarContent({
       }}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <TabsList aria-label="Session inspector" className="shrink-0 bg-background px-2">
+      <TabsList
+        aria-label="Session inspector"
+        className="shrink-0 gap-1 border-border-muted bg-background px-3 py-2"
+      >
         {SESSION_INSPECTOR_TABS.map((tab) => (
-          <TabsTrigger key={tab} value={tab}>
+          <TabsTrigger
+            key={tab}
+            value={tab}
+            className="h-7 min-h-0 flex-none rounded-md border-b-0 px-2.5 text-[13px] data-[state=active]:bg-muted data-[state=inactive]:hover:bg-muted/60"
+          >
             {INSPECTOR_TAB_LABELS[tab]}{" "}
             {tab === "changes" && files.length > 0 && (
               <span className="font-mono text-[10px] text-muted-foreground">{files.length}</span>

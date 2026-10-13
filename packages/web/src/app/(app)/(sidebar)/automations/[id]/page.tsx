@@ -113,7 +113,7 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
+                <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                   {automation.name}
                 </h1>
                 <AutomationStatusBadge automation={automation} />

@@ -4,6 +4,8 @@ import animate from "tailwindcss-animate";
 
 const config: Config = {
   darkMode: "class",
+  // Touch devices fake :hover on tap and leave it stuck; gate hover styles to real pointers.
+  future: { hoverOnlyWhenSupported: true },
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -13,6 +15,8 @@ const config: Config = {
     extend: {
       colors: {
         // Core semantic colors - all use CSS variables that switch with dark mode
+        shell: "var(--shell)",
+        panel: "var(--panel)",
         background: "var(--background)",
         foreground: "var(--foreground)",
         card: "var(--card)",
@@ -47,9 +51,31 @@ const config: Config = {
         overlay: "var(--overlay)",
       },
       borderRadius: {
-        lg: "calc(var(--radius) * 2)",
+        xl: "calc(var(--radius) * 2)",
+        lg: "calc(var(--radius) + 2px)",
         md: "var(--radius)",
-        sm: "calc(var(--radius) / 2)",
+        sm: "calc(var(--radius) - 2px)",
+      },
+      transitionTimingFunction: {
+        "out-strong": "var(--ease-out-strong)",
+        "in-out-strong": "var(--ease-in-out-strong)",
+        drawer: "var(--ease-drawer)",
+      },
+      boxShadow: {
+        card: "var(--shadow-card)",
+        overlay: "var(--shadow-overlay)",
+      },
+      fontFamily: {
+        sans: [
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"SF Pro Text"',
+          '"Segoe UI"',
+          "Roboto",
+          "sans-serif",
+        ],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
     },
   },

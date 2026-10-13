@@ -148,9 +148,11 @@ describe("Home", () => {
 
     const warmingStatus = await screen.findByText("Warming sandbox...");
     const attachmentButton = screen.getByRole("button", { name: "Attach images" });
+    // The attach control leads the toolbar; the status sits with the send button.
     expect(
-      warmingStatus.compareDocumentPosition(attachmentButton) & Node.DOCUMENT_POSITION_FOLLOWING
+      attachmentButton.compareDocumentPosition(warmingStatus) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
+    expect(attachmentButton.parentElement).not.toContainElement(warmingStatus);
 
     resolveCreate?.(Response.json({ sessionId: "session-1", status: "created" }));
     await waitFor(() => expect(screen.queryByText("Warming sandbox...")).not.toBeInTheDocument());
@@ -487,8 +489,9 @@ describe("Home", () => {
     expect(
       branch.compareDocumentPosition(composer) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
-    expect(repository.querySelectorAll("svg")).toHaveLength(1);
-    expect(branch.closest("button")?.querySelectorAll("svg")).toHaveLength(1);
+    // Each target trigger shows a leading kind icon and a trailing chevron.
+    expect(repository.querySelectorAll("svg")).toHaveLength(2);
+    expect(branch.closest("button")?.querySelectorAll("svg")).toHaveLength(2);
     expect(branch).toHaveClass("max-w-[9rem]", "truncate");
     expect(screen.queryByText("build agent")).not.toBeInTheDocument();
   });

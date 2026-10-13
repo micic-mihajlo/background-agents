@@ -285,17 +285,17 @@ export function Combobox<T = string>({
 
       {open && (
         <div
-          className={`absolute ${directionClasses} left-0 ${dropdownWidth} bg-background shadow-lg border border-border z-50`}
+          className={`absolute ${directionClasses} left-0 ${dropdownWidth} overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-overlay z-50`}
         >
           {searchable && (
-            <div className="p-2 border-b border-border-muted">
+            <div className="-mx-1 -mt-1 mb-1 p-2 border-b border-border-muted">
               <input
                 ref={searchInputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full px-2 py-1.5 text-sm bg-input border border-border focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent placeholder:text-secondary-foreground text-foreground"
+                className="w-full rounded-md px-2 py-1.5 text-sm bg-input border border-border focus:outline-none focus:ring-2 focus:ring-ring/25 focus:border-ring placeholder:text-secondary-foreground text-foreground"
                 role="combobox"
                 aria-expanded={open}
                 aria-controls={listboxId}
@@ -325,7 +325,7 @@ export function Combobox<T = string>({
                 return (
                   <div key={group.category} role="group" aria-label={group.category}>
                     <div
-                      className={`px-3 py-1.5 text-xs font-medium text-secondary-foreground uppercase tracking-wider ${
+                      className={`px-2.5 py-1.5 text-xs font-medium text-secondary-foreground ${
                         groupIdx > 0 ? "border-t border-border-muted mt-1" : ""
                       }`}
                     >
@@ -401,7 +401,7 @@ function OptionButton<T>({
       onClick={onSelect}
       onMouseEnter={onMouseEnter}
       data-option-index={dataIndex}
-      className={`w-full flex items-center justify-between px-3 py-2 text-sm transition ${
+      className={`w-full flex items-center justify-between rounded-md px-2.5 py-1.5 text-[13px] transition ${
         isActive ? "bg-muted" : ""
       } ${isSelected ? "text-foreground" : "text-muted-foreground"}`}
     >

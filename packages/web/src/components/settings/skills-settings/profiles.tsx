@@ -81,9 +81,7 @@ export function ProfileForm({
         className="mt-1"
         placeholder="Frontend work"
       />
-      <p className="mb-2 mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Included skills
-      </p>
+      <p className="mb-2 mt-4 text-xs font-medium text-muted-foreground">Included skills</p>
       <div className="max-h-64 space-y-2 overflow-y-auto">
         {skillsError ? (
           <p role="alert" className="text-sm text-destructive">

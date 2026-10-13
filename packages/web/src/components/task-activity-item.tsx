@@ -34,7 +34,7 @@ function TaskDisclosure({
   onToggle: () => void;
 }) {
   return (
-    <div className="border border-border-muted bg-card overflow-hidden">
+    <div className="rounded-lg border border-border-muted bg-card shadow-card overflow-hidden">
       <button
         type="button"
         aria-expanded={isExpanded}
@@ -42,7 +42,7 @@ function TaskDisclosure({
         className="w-full flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-left text-muted-foreground hover:text-foreground transition-colors"
       >
         <ChevronRightIcon
-          className={`w-3.5 h-3.5 flex-shrink-0 text-secondary-foreground transition-transform duration-200 ${
+          className={`w-3.5 h-3.5 flex-shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
             isExpanded ? "rotate-90" : ""
           }`}
         />
@@ -86,10 +86,10 @@ export function TaskActivityItem({
         type="button"
         aria-expanded={isExpanded}
         onClick={() => onToggleSection(sectionKey("task"))}
-        className="flex w-full min-w-0 items-start gap-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="flex w-full min-w-0 items-start gap-1.5 text-left text-[13px] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronRightIcon
-          className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ${
+          className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
             isExpanded ? "rotate-90" : ""
           }`}
         />
@@ -119,8 +119,8 @@ export function TaskActivityItem({
             </div>
           )}
           {hasActivity && (
-            <div className="space-y-1 border-l-2 border-border py-1 pl-2 sm:pl-3">
-              <div className="text-[11px] font-medium uppercase tracking-wide text-secondary-foreground mb-1">
+            <div className="space-y-1 border-l border-border py-1 pl-2 sm:pl-3">
+              <div className="text-[11px] font-medium text-secondary-foreground mb-1">
                 Task activity
               </div>
               {children}

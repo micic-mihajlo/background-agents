@@ -65,9 +65,7 @@ export function WorkspaceSettings() {
 
       {canReadMembers && (
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Members
-          </h3>
+          <h3 className="text-[13px] font-semibold text-muted-foreground">Members</h3>
           <div className="divide-y divide-border rounded-lg border border-border">
             {members.map((member) => (
               <div
@@ -142,9 +140,7 @@ export function WorkspaceSettings() {
 
       {canReadRoles && (
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Roles
-          </h3>
+          <h3 className="text-[13px] font-semibold text-muted-foreground">Roles</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             {roles.map((role) => (
               <article key={role.id} className="rounded-lg border border-border p-4">
