@@ -236,10 +236,10 @@ export function SessionHeader({
 
   return (
     <header className="border-b border-border-muted flex-shrink-0">
-      <div className="flex h-12 items-center justify-between gap-1 px-2 md:h-auto md:gap-4 md:px-4 md:py-3">
+      <div className="flex h-12 items-center justify-between gap-1 px-2 md:h-11 md:gap-3 md:px-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {!isOpen && <CollapsedSidebarControls />}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 md:flex md:items-center md:gap-2">
             {isRenaming && capabilities.lifecycle ? (
               <input
                 autoFocus
@@ -260,7 +260,7 @@ export function SessionHeader({
                 className="w-full truncate bg-transparent text-center text-sm font-medium text-foreground outline-none focus:ring-inset focus:ring-ring md:text-left"
               />
             ) : (
-              <h1 className="flex min-w-0 items-center justify-center text-sm font-medium text-foreground md:justify-start">
+              <h1 className="flex min-w-0 items-center justify-center text-[13px] font-medium text-foreground md:justify-start">
                 <button
                   type="button"
                   className={`min-w-0 truncate ${capabilities.lifecycle ? "cursor-text" : "cursor-default"}`}
@@ -272,7 +272,9 @@ export function SessionHeader({
                 </button>
               </h1>
             )}
-            <p className="hidden truncate text-sm text-muted-foreground md:block">{repoLabel}</p>
+            <p className="hidden min-w-0 max-w-[40%] shrink truncate rounded-sm bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground md:block">
+              {repoLabel}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1 md:gap-4">
@@ -280,7 +282,7 @@ export function SessionHeader({
             ref={detailsButtonRef}
             type="button"
             onClick={onToggleDetails}
-            className="hidden md:block lg:hidden px-3 py-1.5 text-sm text-muted-foreground border border-border-muted hover:text-foreground hover:bg-muted transition"
+            className="hidden md:block lg:hidden h-7 rounded-md px-2.5 text-[13px] font-medium text-muted-foreground border border-border bg-card shadow-card hover:text-foreground hover:bg-muted transition"
             aria-label="Toggle session details"
             aria-controls="session-details-dialog"
             aria-expanded={isDetailsOpen}
@@ -316,7 +318,7 @@ export function SessionHeader({
             type="button"
             ref={desktopDetailsButtonRef}
             onClick={onToggleDesktopDetails}
-            className="hidden rounded p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground lg:block"
+            className="hidden rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground lg:block"
             aria-label={isDesktopDetailsOpen ? "Hide session details" : "Show session details"}
             aria-controls="session-details-sidebar"
             aria-expanded={isDesktopDetailsOpen}
@@ -363,7 +365,7 @@ function ConnectionStatusIcon({
             role="status"
             aria-label={`Connection status: ${label}`}
             tabIndex={0}
-            className="flex h-8 w-8 items-center justify-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span
               aria-hidden="true"
@@ -453,7 +455,7 @@ function SandboxStatusDetail({
           <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{failedPhaseSummary}</p>
         )}
         {reason && (
-          <p className="mt-2 max-h-32 overflow-y-auto whitespace-pre-wrap break-words rounded-sm bg-muted p-2 font-mono text-[11px] leading-4 text-destructive">
+          <p className="mt-2 max-h-32 overflow-y-auto whitespace-pre-wrap break-words rounded-md bg-muted p-2 font-mono text-[11px] leading-4 text-destructive">
             {reason}
           </p>
         )}
@@ -486,7 +488,7 @@ function SandboxStatusIcon(props: SandboxStatusProps) {
         <button
           type="button"
           aria-label={`Sandbox status: ${presentation.label}`}
-          className={`relative flex h-8 w-8 items-center justify-center rounded-sm border border-border ${presentation.color} transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+          className={`relative flex h-7 w-7 items-center justify-center rounded-md ${presentation.color} transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
         >
           <BoxIcon className="h-4 w-4" />
           <span

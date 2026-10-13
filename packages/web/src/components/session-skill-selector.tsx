@@ -65,7 +65,7 @@ export function SessionSkillSelector({
       direction="up"
       dropdownWidth="w-64"
       disabled={disabled || loading}
-      triggerClassName="flex max-w-full items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition"
+      triggerClassName="flex h-7 max-w-full items-center gap-1.5 rounded-md px-2 text-[13px] text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
     >
       <SparkleIcon className="h-3.5 w-3.5" />
       <span className="max-w-[9rem] truncate">{selectedLabel}</span>

@@ -88,12 +88,12 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SettingsViewportProvider value={false}>
-      <div className="flex h-dvh overflow-hidden bg-background">
+      <div className="flex h-dvh overflow-hidden bg-shell">
         <SettingsNav
           activeCategory={activeCategory}
           onSelect={(category) => router.push(`/settings?tab=${category}`)}
         />
-        <main className="min-w-0 flex-1 overflow-y-auto px-8 py-10 lg:px-12">
+        <main className="my-2 mr-2 min-w-0 flex-1 overflow-y-auto rounded-lg border border-border-muted bg-background px-8 py-10 shadow-card lg:px-12">
           <div className="mx-auto max-w-3xl">{children}</div>
         </main>
       </div>

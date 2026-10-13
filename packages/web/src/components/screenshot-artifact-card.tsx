@@ -29,7 +29,7 @@ export function ScreenshotArtifactCard({
   const caption = metadata?.caption || (isVideo ? "Video recording" : "Screenshot");
 
   return (
-    <div className={cn("overflow-hidden border border-border-muted bg-card", className)}>
+    <div className={cn("overflow-hidden rounded-lg border border-border-muted bg-card", className)}>
       <button
         type="button"
         onClick={() => onOpen(artifactId)}

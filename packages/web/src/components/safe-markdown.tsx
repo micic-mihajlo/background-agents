@@ -182,7 +182,7 @@ export function SafeMarkdown({
           // Code blocks with styling
           pre: ({ children, ...props }: ComponentPropsWithoutRef<"pre">) => (
             <pre
-              className="not-prose max-w-full overflow-x-auto text-sm leading-relaxed rounded"
+              className="not-prose max-w-full overflow-x-auto rounded-lg border border-border-muted text-[13px] leading-relaxed"
               {...props}
             >
               {children}
@@ -200,7 +200,7 @@ export function SafeMarkdown({
             // Inline code: explicit styling with background, border, and monospace
             return (
               <code
-                className="font-mono bg-muted border border-border rounded px-1.5 py-0.5 text-[0.85em]"
+                className="rounded-[4px] bg-muted px-1 py-0.5 font-mono text-[0.85em] font-medium text-foreground/80"
                 {...props}
               >
                 {children}
@@ -226,28 +226,31 @@ export function SafeMarkdown({
           ),
           // Blockquotes
           blockquote: ({ children, ...props }: ComponentPropsWithoutRef<"blockquote">) => (
-            <blockquote
-              className="border-l-4 border-border pl-4 italic text-muted-foreground"
-              {...props}
-            >
+            <blockquote className="border-l-2 border-border pl-4 text-muted-foreground" {...props}>
               {children}
             </blockquote>
           ),
           // Tables
           table: ({ children, ...props }: ComponentPropsWithoutRef<"table">) => (
-            <div className="max-w-full overflow-x-auto">
-              <table className="min-w-full border-collapse text-sm" {...props}>
+            <div className="not-prose my-3 max-w-full overflow-x-auto rounded-lg border border-border-muted">
+              <table
+                className="min-w-full border-collapse text-[13px] [&_tr:last-child_td]:border-b-0"
+                {...props}
+              >
                 {children}
               </table>
             </div>
           ),
           th: ({ children, ...props }: ComponentPropsWithoutRef<"th">) => (
-            <th className="border border-border px-3 py-1 bg-card font-medium" {...props}>
+            <th
+              className="border-b border-border-muted bg-panel px-3 py-1.5 text-left text-xs font-medium text-muted-foreground"
+              {...props}
+            >
               {children}
             </th>
           ),
           td: ({ children, ...props }: ComponentPropsWithoutRef<"td">) => (
-            <td className="border border-border px-3 py-1" {...props}>
+            <td className="border-b border-border-muted px-3 py-1.5" {...props}>
               {children}
             </td>
           ),

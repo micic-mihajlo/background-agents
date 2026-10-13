@@ -15,7 +15,10 @@ import {
   SearchIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  ArchiveIcon,
 } from "@/components/ui/icons";
+import { AppIcon } from "@/components/ui/app-icon";
+import { APP_NAME } from "@/lib/site-config";
 import { PRIMARY_APP_DESTINATIONS, SETTINGS_DESTINATION } from "@/components/app-destinations";
 import { Button } from "@/components/ui/button";
 import { useEnvironments } from "@/hooks/use-environments";
@@ -37,6 +40,11 @@ const DEFAULT_SESSION_GROUP_EXPANDED_STATE: Record<SessionGroupId, boolean> = {
 };
 const SESSION_GROUP_EXPANDED_STORAGE_KEY_PREFIX = "open-inspect-session-sidebar-expanded:";
 
+const NAV_ITEM_CLASS =
+  "flex h-8 w-full items-center gap-2.5 rounded-md px-2 text-[13px] font-medium transition-[color,background-color,box-shadow,transform] duration-150 ease-out-strong active:scale-[0.98]";
+const NAV_ITEM_ACTIVE_CLASS = "bg-card text-foreground shadow-card";
+const NAV_ITEM_IDLE_CLASS = "text-muted-foreground hover:bg-muted hover:text-foreground";
+
 interface SidebarActionButtonProps {
   onClick?: () => void;
 }
@@ -53,6 +61,25 @@ export function SearchSessionsButton({ onClick }: SidebarActionButtonProps) {
     >
       <SearchIcon className="w-4 h-4" />
     </Button>
+  );
+}
+
+function SidebarSearchField({ onClick }: SidebarActionButtonProps) {
+  const { labels } = useKeyboardShortcuts();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={`Quick search recent sessions (${labels["open-command-menu"]})`}
+      aria-label={`Quick search recent sessions (${labels["open-command-menu"]})`}
+      className="flex h-8 w-full items-center gap-2 rounded-md border border-border-muted bg-card px-2.5 text-left text-[13px] text-secondary-foreground shadow-card transition-[color,border-color,transform] duration-150 ease-out-strong hover:border-border hover:text-muted-foreground active:scale-[0.98]"
+    >
+      <SearchIcon className="h-3.5 w-3.5 shrink-0" />
+      <span className="flex-1">Search</span>
+      <kbd className="rounded-sm bg-muted px-1.5 py-px font-sans text-[11px] font-medium text-muted-foreground">
+        {labels["open-command-menu"]}
+      </kbd>
+    </button>
   );
 }
 
@@ -188,8 +215,8 @@ export function SessionSidebar({
             type="button"
             aria-expanded={expanded}
             aria-controls={contentId}
-            className={`flex min-h-10 w-full items-center gap-1.5 px-4 text-left text-xs font-medium uppercase tracking-wider transition-colors hover:bg-muted hover:text-foreground ${
-              emphasize ? "text-foreground" : "text-secondary-foreground"
+            className={`group/heading mt-1 flex h-7 w-full items-center gap-1 rounded-md px-2 text-left text-xs font-medium transition-colors hover:text-foreground ${
+              emphasize ? "text-muted-foreground" : "text-secondary-foreground"
             }`}
             onClick={() => {
               const nextExpanded = !expanded;
@@ -207,17 +234,20 @@ export function SessionSidebar({
               }
             }}
           >
-            <span aria-hidden="true">
+            {title}
+            <span
+              aria-hidden="true"
+              className="ml-auto opacity-0 transition group-hover/heading:opacity-100"
+            >
               {expanded ? (
-                <ChevronDownIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <ChevronDownIcon className="h-3 w-3 shrink-0" />
               ) : (
-                <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <ChevronRightIcon className="h-3 w-3 shrink-0" />
               )}
             </span>
-            {title}
           </button>
         </h2>
-        <div id={contentId}>
+        <div id={contentId} className="flex flex-col gap-px">
           {expanded && (
             <>
               {groupSessions.map((session) => (
@@ -238,7 +268,7 @@ export function SessionSidebar({
                 />
               ))}
               {Boolean(pagination.error) && (
-                <div className="mx-3 my-1 flex items-center justify-between gap-2 px-1 py-2 text-xs text-destructive">
+                <div className="my-1 flex items-center justify-between gap-2 px-2 py-2 text-xs text-destructive">
                   <span>Unable to load {title.toLowerCase()}</span>
                   <Button variant="ghost" size="sm" onClick={() => void pagination.retry()}>
                     Retry
@@ -249,7 +279,7 @@ export function SessionSidebar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mx-3 my-1 w-[calc(100%-1.5rem)] text-xs text-muted-foreground"
+                  className="my-1 w-full justify-start px-2 text-xs text-secondary-foreground"
                   disabled={pagination.loadingMore}
                   onClick={pagination.loadMore}
                 >
@@ -264,45 +294,52 @@ export function SessionSidebar({
   };
 
   return (
-    <aside className="w-72 h-dvh flex flex-col border-r border-border-muted bg-background">
+    <aside className="w-72 h-dvh flex flex-col bg-shell">
       {/* Header */}
-      <div className="border-b border-border-muted">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggle}
-              title={`Toggle sidebar (${labels["toggle-sidebar"]})`}
-              aria-label={`Toggle sidebar (${labels["toggle-sidebar"]})`}
-            >
-              <SidebarIcon className="w-4 h-4" />
-            </Button>
-            <SearchSessionsButton onClick={onSearchSessions} />
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {hasPermission("sessions.create") && <NewSessionButton onClick={onNewSession} />}
-            <Link
-              href={SETTINGS_DESTINATION.href}
-              onClick={handleNavigationSelect}
-              className={`p-1.5 transition ${
-                pathname === SETTINGS_DESTINATION.href
-                  ? "text-foreground bg-muted"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-              title={SETTINGS_DESTINATION.label}
-            >
-              <SettingsDestinationIcon className="w-4 h-4" />
-            </Link>
-          </div>
+      <div className="flex flex-col gap-2 px-3 pt-3 pb-1">
+        <div className="flex h-8 items-center justify-between gap-2">
+          <Link
+            href="/"
+            onClick={handleNavigationSelect}
+            className="flex min-w-0 items-center gap-2 rounded-md px-1 py-1 text-sm font-semibold tracking-tight text-foreground transition hover:bg-muted"
+          >
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+              <AppIcon className="h-3.5 w-3.5" />
+            </span>
+            <span className="truncate">{APP_NAME}</span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            title={`Toggle sidebar (${labels["toggle-sidebar"]})`}
+            aria-label={`Toggle sidebar (${labels["toggle-sidebar"]})`}
+          >
+            <SidebarIcon className="w-4 h-4" />
+          </Button>
         </div>
-        <div className="px-4 pb-2 empty:hidden">
+        <div className="empty:hidden">
           <TeamSwitcher onNavigate={handleNavigationSelect} />
         </div>
+        <SidebarSearchField onClick={onSearchSessions} />
       </div>
 
       {/* Nav links */}
-      <div className="px-3 pt-2 pb-1 flex flex-col gap-0.5">
+      <nav className="px-3 pt-1 pb-2 flex flex-col gap-px" aria-label="Primary">
+        {hasPermission("sessions.create") && (
+          <button
+            type="button"
+            onClick={onNewSession}
+            title={`New session (${labels["new-session"]})`}
+            aria-label={`New session (${labels["new-session"]})`}
+            className={`${NAV_ITEM_CLASS} ${
+              pathname === "/" ? NAV_ITEM_ACTIVE_CLASS : NAV_ITEM_IDLE_CLASS
+            }`}
+          >
+            <PlusIcon className="h-4 w-4" />
+            <span className="flex-1 text-left">New session</span>
+          </button>
+        )}
         {PRIMARY_APP_DESTINATIONS.filter((destination) =>
           hasPermission(destination.requiredPermission)
         ).map(({ href, label, icon: Icon }) => (
@@ -313,19 +350,20 @@ export function SessionSidebar({
             aria-current={
               pathname === href || pathname?.startsWith(`${href}/`) ? "page" : undefined
             }
-            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition ${
+            className={`${NAV_ITEM_CLASS} ${
               pathname === href || pathname?.startsWith(`${href}/`)
-                ? "text-foreground bg-muted"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                ? NAV_ITEM_ACTIVE_CLASS
+                : NAV_ITEM_IDLE_CLASS
             }`}
           >
             <Icon className="w-4 h-4" />
             {label}
           </Link>
         ))}
-      </div>
+      </nav>
 
-      <div className="px-3 py-2">
+      <div className="flex items-center justify-between px-5 pt-2 pb-1">
+        <span className="text-xs font-medium text-secondary-foreground">Sessions</span>
         <ToggleGroup
           type="single"
           value={sessionCreatorFilter ?? ""}
@@ -334,18 +372,18 @@ export function SessionSidebar({
               setSessionCreatorFilter(value);
             }
           }}
-          className="grid grid-cols-2 rounded-md border border-border-muted bg-muted p-0.5"
+          className="gap-0.5 rounded-md bg-muted p-0.5"
           aria-label="Session owner filter"
         >
           <ToggleGroupItem
             value="all"
-            className="h-7 rounded-sm text-xs data-[state=on]:bg-background data-[state=on]:text-foreground"
+            className="h-5 min-w-0 rounded-sm px-2 text-[11px] text-muted-foreground hover:bg-transparent data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-card"
           >
             All
           </ToggleGroupItem>
           <ToggleGroupItem
             value="mine"
-            className="h-7 rounded-sm text-xs data-[state=on]:bg-background data-[state=on]:text-foreground"
+            className="h-5 min-w-0 rounded-sm px-2 text-[11px] text-muted-foreground hover:bg-transparent data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-card"
           >
             Mine
           </ToggleGroupItem>
@@ -353,7 +391,7 @@ export function SessionSidebar({
       </div>
 
       {/* Session List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-2 pb-2">
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-current border-t-transparent text-muted-foreground" />
@@ -396,9 +434,9 @@ export function SessionSidebar({
               <Link
                 href={buildSessionsHref({ ...teamQuery, lifecycle: "archived" })}
                 onClick={handleNavigationSelect}
-                className="mt-2 flex items-center gap-1 px-4 py-2 text-xs font-medium uppercase tracking-wider text-secondary-foreground transition hover:bg-muted hover:text-foreground"
+                className="mt-2 flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-secondary-foreground transition hover:bg-muted hover:text-foreground"
               >
-                <ChevronRightIcon className="h-3.5 w-3.5" />
+                <ArchiveIcon className="h-3.5 w-3.5" />
                 Archived
               </Link>
             )}
@@ -406,8 +444,23 @@ export function SessionSidebar({
         )}
       </div>
 
-      <div className="border-t border-border-muted p-2">
-        <UserMenu user={authSession?.user} />
+      <div className="flex items-center gap-1 px-2 pb-2 pt-1">
+        <div className="min-w-0 flex-1">
+          <UserMenu user={authSession?.user} />
+        </div>
+        <Link
+          href={SETTINGS_DESTINATION.href}
+          onClick={handleNavigationSelect}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition ${
+            pathname === SETTINGS_DESTINATION.href
+              ? "bg-card text-foreground shadow-card"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          }`}
+          title={SETTINGS_DESTINATION.label}
+          aria-label={SETTINGS_DESTINATION.label}
+        >
+          <SettingsDestinationIcon className="w-4 h-4" />
+        </Link>
       </div>
     </aside>
   );

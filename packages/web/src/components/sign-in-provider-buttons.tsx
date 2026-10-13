@@ -58,11 +58,11 @@ export function SignInProviderButtons({ providers }: { providers: readonly SignI
             key={provider}
             type="button"
             variant={presentation.variant}
-            className="gap-2 px-6 py-3"
+            className="h-10 w-full gap-2 px-4"
             disabled={pending}
             onClick={() => void handleSignIn(provider)}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-4 h-4" />
             Sign in with {presentation.label}
           </Button>
         );

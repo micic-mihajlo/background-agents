@@ -694,7 +694,7 @@ export function SandboxSettingsPage() {
           direction="down"
           dropdownWidth="w-full max-w-sm"
           disabled={loadingRepos}
-          triggerClassName="w-full max-w-sm flex items-center justify-between px-3 py-2 text-sm border border-border bg-input text-foreground hover:border-foreground/30 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          triggerClassName="w-full max-w-sm flex items-center justify-between rounded-md shadow-card px-3 py-2 text-sm border border-border bg-input text-foreground hover:border-foreground/30 disabled:opacity-50 disabled:cursor-not-allowed transition"
           prependContent={({ select }) => (
             <>
               <button

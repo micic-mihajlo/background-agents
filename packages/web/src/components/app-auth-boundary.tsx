@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuthSession } from "@/lib/auth-session";
 import { APP_NAME } from "@/lib/site-config";
+import { AppIcon } from "@/components/ui/app-icon";
 import { Button } from "@/components/ui/button";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { useCurrentUserAuthorization } from "@/hooks/use-current-user-authorization";
@@ -29,7 +30,7 @@ export function AppAuthBoundary({ children }: { children: React.ReactNode }) {
   if (status === "unavailable") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-8 px-6">
-        <h1 className="text-4xl font-bold text-foreground">{APP_NAME}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{APP_NAME}</h1>
         <ErrorBanner role="alert" className="max-w-md px-6 py-4 text-center">
           Authentication is temporarily unavailable.
         </ErrorBanner>
@@ -39,12 +40,15 @@ export function AppAuthBoundary({ children }: { children: React.ReactNode }) {
 
   if (status === "unauthenticated") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-8">
-        <h1 className="text-4xl font-bold text-foreground">{APP_NAME}</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-5 bg-shell px-6">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+          <AppIcon className="h-5 w-5" />
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{APP_NAME}</h1>
         <p className="text-muted-foreground max-w-md text-center">
           Background coding agent for your team. Ship faster with AI-powered code changes.
         </p>
-        <Button asChild className="px-6 py-3">
+        <Button asChild className="h-9 px-5">
           <Link href="/login">Sign in</Link>
         </Button>
       </div>

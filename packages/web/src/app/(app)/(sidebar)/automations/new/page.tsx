@@ -103,7 +103,7 @@ function NewAutomationContent() {
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-2xl mx-auto">
-            <h1 className="mb-2 text-2xl font-semibold text-foreground sm:text-3xl">
+            <h1 className="mb-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               Automation Created
             </h1>
             {webhookResult.sentryWebhookUrl ? (
@@ -160,7 +160,7 @@ function NewAutomationContent() {
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="mb-6 text-2xl font-semibold text-foreground sm:text-3xl">
+          <h1 className="mb-6 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Create Automation
           </h1>
 

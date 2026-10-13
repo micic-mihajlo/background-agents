@@ -461,7 +461,7 @@ function SlackChannelPicker({
         searchPlaceholder="Search channels..."
         dropdownWidth="w-64"
         disabled={loading}
-        triggerClassName="flex w-56 items-center gap-1.5 px-3 py-2 text-xs border border-border bg-input text-foreground hover:border-foreground/20 transition"
+        triggerClassName="flex w-56 items-center gap-1.5 rounded-md shadow-card px-3 py-2 text-xs border border-border bg-input text-foreground hover:border-foreground/20 transition"
       >
         <span className="truncate flex-1 text-left">
           {loading ? "Loading channels..." : "Add channel..."}

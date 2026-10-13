@@ -280,7 +280,7 @@ function PullRequestCard({
 
   if (presentation.detail) {
     return (
-      <div className="border border-destructive-border bg-destructive-muted p-4 text-xs">
+      <div className="rounded-lg border border-destructive-border bg-destructive-muted p-4 text-xs">
         <div className="flex items-start gap-2 text-destructive">
           <ErrorIcon className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
@@ -298,7 +298,7 @@ function PullRequestCard({
   const repository = getStringArg(event, "repo") ?? repositoryFromUrl(safeUrl);
 
   return (
-    <div className="overflow-hidden border border-border bg-card">
+    <div className="rounded-lg overflow-hidden border border-border bg-card">
       <div className="bg-muted/40 p-4">
         <div className="mb-3 flex items-center justify-between gap-3 text-xs text-muted-foreground">
           <span className="flex min-w-0 items-center gap-1.5 truncate">

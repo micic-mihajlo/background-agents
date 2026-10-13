@@ -302,7 +302,7 @@ export function EnvironmentsSettings({
             const isTriggering = triggeringIds.has(environment.id);
 
             return (
-              <div key={environment.id} className="border border-border px-4 py-3">
+              <div key={environment.id} className="rounded-lg border border-border px-4 py-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

@@ -113,7 +113,7 @@ export function BudgetSection({
               step="0.01"
               value={value}
               onChange={(event) => setValue(event.target.value)}
-              className="min-w-0 flex-1 border border-border bg-input px-2 py-1 text-foreground"
+              className="rounded-md min-w-0 flex-1 border border-border bg-input px-2 py-1 text-foreground"
               disabled={saving}
             />
             <button type="button" className="text-accent" onClick={saveValue} disabled={saving}>

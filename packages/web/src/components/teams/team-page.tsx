@@ -123,7 +123,7 @@ function TeamContent({ initialTeam, slug }: { initialTeam: TeamResponse; slug: s
       <div className="mt-4 mb-6">
         <h1
           id="team-heading"
-          className="break-words text-2xl font-semibold text-foreground sm:text-3xl"
+          className="break-words text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
         >
           {team.name}
         </h1>

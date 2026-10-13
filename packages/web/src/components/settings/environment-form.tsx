@@ -334,7 +334,7 @@ function EnvironmentRepositoryRow({
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border border-border-muted px-3 py-2">
+    <div className="rounded-lg flex flex-wrap items-center gap-2 border border-border-muted px-3 py-2">
       <RepoIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0 flex-1 truncate text-sm text-foreground" title={repositoryKey}>
         {repositoryKey}

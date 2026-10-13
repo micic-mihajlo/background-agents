@@ -6,6 +6,7 @@ import { AuthenticationUnavailableError } from "@/lib/authentication-unavailable
 import { getServerAuthSession, type ServerAuthSession } from "@/lib/server-auth-session";
 import { getEnabledSignInProviders } from "@/lib/sign-in-providers";
 import { APP_NAME } from "@/lib/site-config";
+import { AppIcon } from "@/components/ui/app-icon";
 
 export const dynamic = "force-dynamic";
 
@@ -41,12 +42,21 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-8 px-6">
-      <div className="space-y-3 text-center">
-        <h1 className="text-4xl font-bold text-foreground">Sign in to {APP_NAME}</h1>
-        <p className="text-muted-foreground">Choose an authentication provider to continue.</p>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-shell px-6">
+      <div className="w-full max-w-sm rounded-xl border border-border-muted bg-background p-8 shadow-overlay">
+        <div className="mb-6 space-y-2 text-center">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+            <AppIcon className="h-5 w-5" />
+          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Sign in to {APP_NAME}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Choose an authentication provider to continue.
+          </p>
+        </div>
+        <SignInProviderButtons providers={providers} />
       </div>
-      <SignInProviderButtons providers={providers} />
     </main>
   );
 }

@@ -245,7 +245,9 @@ function SessionsContent() {
         <div className="max-w-3xl mx-auto">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">Sessions</h1>
+              <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                Sessions
+              </h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Find past and current work, including archived sessions and older history.
               </p>
