@@ -82,9 +82,7 @@ function SkippedInvocationRow({ invocation }: { invocation: AutomationInvocation
     <div className="px-4 py-3">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 min-w-0">{statusBadge(invocation.status)}</div>
-        <span className="text-xs text-muted-foreground flex-shrink-0">
-          {firedAtLabel(invocation)}
-        </span>
+        <span className="text-xs text-muted-foreground shrink-0">{firedAtLabel(invocation)}</span>
       </div>
       {invocation.skipReason && (
         <p className="mt-1 text-xs text-warning">{formatRunReason(invocation.skipReason)}</p>
@@ -110,7 +108,7 @@ function SingleRunRow({ invocation }: { invocation: AutomationInvocation }) {
             <span className="text-xs text-muted-foreground">{run.artifactSummary}</span>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs text-muted-foreground">{firedAtLabel(invocation)}</span>
           {run.sessionId && (
             <Link
@@ -172,7 +170,7 @@ function TargetRunRow({
         <Link
           href={`/session/${run.sessionId}`}
           aria-label={`View session for ${repoLabel}`}
-          className="text-xs text-accent hover:underline flex-shrink-0 mt-0.5"
+          className="text-xs text-accent hover:underline shrink-0 mt-0.5"
         >
           View session
         </Link>
@@ -217,9 +215,7 @@ function FanOutInvocationRow({
           <span className="text-xs text-muted-foreground">{formatRunCounts(invocation.runs)}</span>
           {duration && <span className="text-xs text-muted-foreground">{duration}</span>}
         </div>
-        <span className="text-xs text-muted-foreground flex-shrink-0">
-          {firedAtLabel(invocation)}
-        </span>
+        <span className="text-xs text-muted-foreground shrink-0">{firedAtLabel(invocation)}</span>
       </button>
       {expanded && (
         <div className="mt-3 space-y-1 border-t border-border-muted pt-3">

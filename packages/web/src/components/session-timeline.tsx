@@ -15,7 +15,6 @@ import { SafeMarkdown } from "@/components/safe-markdown";
 import { ScreenshotArtifactCard } from "@/components/screenshot-artifact-card";
 import { SessionWorkGroup } from "@/components/session-work-group";
 import { TaskActivityItem } from "@/components/task-activity-item";
-import { TimelineRowContent } from "@/components/timeline-row-content";
 import { ToolCallGroup } from "@/components/tool-call-group";
 import { copyToClipboard } from "@/lib/format";
 import {
@@ -37,7 +36,11 @@ import {
 import { toUiArtifactMetadata } from "@/lib/session-socket/artifact-metadata";
 import type { SandboxEvent } from "@/types/session";
 import type { SessionParticipantProfile } from "@open-inspect/shared/types/sessions";
-import { CheckIcon, CopyIcon, ErrorIcon, SparkleIcon } from "@/components/ui/icons";
+import { CheckIcon, CopyIcon, SparkleIcon } from "@/components/ui/icons";
+import { CircleAlertIcon, CircleCheckIcon, GitBranchIcon, TriangleAlertIcon } from "lucide-react";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Message, MessageContent, MessageHeader } from "@/components/ui/message";
+import { Trace, TraceDescription, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
 import { resolveParticipantDisplay } from "@/lib/participant-display";
 import { cn } from "@/lib/utils";
 import type { PromptQueueItem } from "@open-inspect/shared/types/server-messages";
@@ -309,10 +312,14 @@ export function SessionTimeline({
 
 function ThinkingIndicator() {
   return (
-    <div className="flex items-center gap-2 px-1 py-3">
-      <span className="inline-block w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-      <span className="text-[13px] font-medium text-muted-foreground">Thinking...</span>
-    </div>
+    <Trace className="px-1 py-3">
+      <TraceLine status="running">
+        <TraceIcon>
+          <SparkleIcon className="text-accent" />
+        </TraceIcon>
+        <TraceTitle className="font-medium">Thinking...</TraceTitle>
+      </TraceLine>
+    </Trace>
   );
 }
 
@@ -353,11 +360,15 @@ type MessageFrameProps = {
   time: string;
   copied: boolean;
   content: string;
-  className: string;
-  copyButtonClassName: string;
+  align: "start" | "end";
+  bubbleVariant: "muted" | "ghost";
+  bubbleClassName?: string;
   onCopyContent: (content: string) => void;
   children: ReactNode;
 };
+
+const COPY_BUTTON_CLASS_NAME =
+  "rounded-md p-1 text-secondary-foreground hover:text-foreground hover:bg-muted opacity-0 pointer-events-none group-hover/message:opacity-100 group-hover/message:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto transition-colors";
 
 function CopyButton({
   copied,
@@ -381,34 +392,53 @@ function CopyButton({
   );
 }
 
+/**
+ * One turn in the thread, following the AI Elements Message pattern: a header
+ * with the author, time and copy action above a bubble.
+ */
 function MessageFrame({
   label,
   time,
   copied,
   content,
-  className,
-  copyButtonClassName,
+  align,
+  bubbleVariant,
+  bubbleClassName,
   onCopyContent,
   children,
 }: MessageFrameProps) {
   return (
-    <div className={`min-w-0 ${className}`}>
-      <div className="mb-1.5 flex min-w-0 items-center justify-between gap-2">
-        {label}
-        <div className="flex shrink-0 items-center gap-1.5">
-          <CopyButton
-            copied={copied}
-            className={copyButtonClassName}
-            onClick={() => onCopyContent(content)}
-          />
-          <span className="text-xs text-secondary-foreground">{time}</span>
-        </div>
-      </div>
-      {children}
-    </div>
+    <Message align={align} className="py-1.5">
+      <MessageContent className="gap-1.5">
+        <MessageHeader
+          className={cn(
+            "w-full gap-2 px-1 font-normal",
+            align === "end" ? "flex-row-reverse" : "justify-between"
+          )}
+        >
+          {label}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <CopyButton
+              copied={copied}
+              className={COPY_BUTTON_CLASS_NAME}
+              onClick={() => onCopyContent(content)}
+            />
+            <span className="text-xs text-secondary-foreground">{time}</span>
+          </div>
+        </MessageHeader>
+        <Bubble align={align} variant={bubbleVariant} className={bubbleClassName}>
+          <BubbleContent
+            className={cn(bubbleVariant === "ghost" ? "w-full px-1" : "rounded-2xl px-3.5 py-2.5")}
+          >
+            {children}
+          </BubbleContent>
+        </Bubble>
+      </MessageContent>
+    </Message>
   );
 }
 
+/** A status update as a single trace line, with an icon for its tone. */
 function StatusRow({
   tone,
   time,
@@ -418,28 +448,25 @@ function StatusRow({
   time: string;
   children: ReactNode;
 }) {
-  const dotClassName =
-    tone === "success"
-      ? "bg-success"
-      : tone === "destructive"
-        ? "bg-destructive"
-        : tone === "warning"
-          ? "bg-warning"
-          : "bg-accent";
-  const textClassName =
-    tone === "success"
-      ? "text-success"
-      : tone === "destructive"
-        ? "text-destructive"
-        : tone === "warning"
-          ? "text-warning"
-          : "text-muted-foreground";
+  const icon =
+    tone === "success" ? (
+      <CircleCheckIcon className="text-success" />
+    ) : tone === "destructive" ? (
+      <CircleAlertIcon />
+    ) : tone === "warning" ? (
+      <TriangleAlertIcon className="text-warning" />
+    ) : (
+      <GitBranchIcon />
+    );
 
   return (
-    <div className={`flex min-w-0 items-start gap-2 text-sm ${textClassName}`}>
-      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
-      <TimelineRowContent time={time}>{children}</TimelineRowContent>
-    </div>
+    <Trace className="py-1">
+      <TraceLine status={tone === "destructive" ? "error" : undefined} className="w-full">
+        <TraceIcon>{icon}</TraceIcon>
+        <TraceTitle className="whitespace-normal wrap-anywhere">{children}</TraceTitle>
+        <TraceDescription className="ml-auto pl-2 text-xs">{time}</TraceDescription>
+      </TraceLine>
+    </Trace>
   );
 }
 
@@ -531,8 +558,9 @@ function UserMessageEvent({
       time={formatEventTime(event)}
       copied={copied}
       content={autofixFeedback ? formatGitHubAutofixFeedbackMarkdown(autofixFeedback) : rawContent}
-      className="group my-1 rounded-lg border border-border-muted bg-panel px-3 py-2.5 shadow-card sm:px-3.5"
-      copyButtonClassName="rounded-md p-1 text-secondary-foreground hover:text-foreground hover:bg-muted opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto transition-colors"
+      align={isCurrentUser ? "end" : "start"}
+      bubbleVariant="muted"
+      bubbleClassName={event.origin ? "max-w-full" : "max-w-[85%]"}
       onCopyContent={onCopyContent}
     >
       {event.origin && (
@@ -571,7 +599,7 @@ function UserMessageEvent({
           <pre
             tabIndex={boundedRawAutofix ? 0 : undefined}
             className={cn(
-              "whitespace-pre-wrap font-sans text-sm leading-6 text-foreground [overflow-wrap:anywhere]",
+              "whitespace-pre-wrap font-sans text-sm leading-6 text-foreground wrap-anywhere",
               boundedRawAutofix &&
                 "max-h-96 overflow-auto focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
             )}
@@ -606,8 +634,9 @@ function AssistantMessageEvent({ event, copied, onCopyContent }: EventRendererPr
       time={formatEventTime(event)}
       copied={copied}
       content={event.content}
-      className="group px-1 py-2"
-      copyButtonClassName="rounded-md p-1 text-secondary-foreground hover:text-foreground hover:bg-muted opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto transition-colors"
+      align="start"
+      bubbleVariant="ghost"
+      bubbleClassName="w-full max-w-full"
       onCopyContent={onCopyContent}
     >
       <SafeMarkdown content={event.content} className="text-sm leading-6" linkRepositoryFiles />
@@ -619,10 +648,9 @@ function ToolResultEvent({ event }: EventRendererProps) {
   if (event.type !== "tool_result") return null;
 
   return (
-    <div className="flex min-w-0 items-start gap-2 py-1 text-sm text-destructive">
-      <ErrorIcon className="h-4 w-4 shrink-0" />
-      <TimelineRowContent time={formatEventTime(event)}>{event.error}</TimelineRowContent>
-    </div>
+    <StatusRow tone="destructive" time={formatEventTime(event)}>
+      {event.error}
+    </StatusRow>
   );
 }
 

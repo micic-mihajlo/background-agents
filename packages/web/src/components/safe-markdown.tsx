@@ -4,7 +4,15 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import type { ComponentPropsWithoutRef } from "react";
+import { Children, isValidElement, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockHeader,
+  CodeBlockTitle,
+} from "@/components/ui/code-block";
 import type { Root, RootContent } from "mdast";
 import { isPathWithLineReference, isRepositoryFileHref } from "@/lib/diff-file-links";
 import { useSessionFileLinks } from "@/lib/session-file-links";
@@ -140,6 +148,14 @@ function RepositoryFileMarkdownLink({ href, children, ...props }: ComponentProps
   );
 }
 
+/** Plain text of rendered markdown children, for copying highlighted code. */
+function nodeText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeText).join("");
+  if (isValidElement<{ children?: ReactNode }>(node)) return nodeText(node.props.children);
+  return Children.toArray(node).map(nodeText).join("");
+}
+
 export function SafeMarkdown({
   content,
   className = "",
@@ -149,7 +165,7 @@ export function SafeMarkdown({
 }: SafeMarkdownProps) {
   return (
     <div
-      className={`prose prose-sm dark:prose-invert min-w-0 max-w-none break-words [overflow-wrap:anywhere] ${className}`}
+      className={`prose prose-sm dark:prose-invert min-w-0 max-w-none wrap-break-word wrap-anywhere ${className}`}
     >
       <ReactMarkdown
         remarkPlugins={linkRepositoryFiles ? [remarkGfm, preserveFileLineReferences] : [remarkGfm]}
@@ -179,15 +195,30 @@ export function SafeMarkdown({
             if (imageMode !== "placeholder") return null;
             return <span>{resolvedSrc ? `${alt?.trim() || "Image"}: ${resolvedSrc}` : alt}</span>;
           },
-          // Code blocks with styling
-          pre: ({ children, ...props }: ComponentPropsWithoutRef<"pre">) => (
-            <pre
-              className="not-prose max-w-full overflow-x-auto rounded-lg border border-border-muted text-[13px] leading-relaxed"
-              {...props}
-            >
-              {children}
-            </pre>
-          ),
+          // Fenced code renders as a Code Block. rehype-highlight still tokenizes it, so the
+          // user's highlight theme colors the tokens.
+          pre: ({ children }: ComponentPropsWithoutRef<"pre">) => {
+            const code = isValidElement<{ className?: string; children?: ReactNode }>(children)
+              ? children.props
+              : { className: undefined, children };
+            const language = /language-([\w+-]+)/.exec(code.className ?? "")?.[1];
+            const text = nodeText(code.children).replace(/\n$/, "");
+            return (
+              <CodeBlock className="not-prose my-3">
+                <CodeBlockHeader>
+                  <CodeBlockTitle className="font-mono text-xs font-normal text-muted-foreground">
+                    {language ?? "text"}
+                  </CodeBlockTitle>
+                  <CodeBlockActions>
+                    <CodeBlockCopyButton value={text} />
+                  </CodeBlockActions>
+                </CodeBlockHeader>
+                <CodeBlockContent className="text-[13px]">
+                  <span>{code.children}</span>
+                </CodeBlockContent>
+              </CodeBlock>
+            );
+          },
           code: ({ className, children, ...props }: ComponentPropsWithoutRef<"code">) => {
             // Code blocks: pass through hljs/language classes for syntax highlighting
             if (className) {

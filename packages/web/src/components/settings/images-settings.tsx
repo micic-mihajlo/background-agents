@@ -179,7 +179,7 @@ export function ImagesSettings() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+                <div className="flex items-center gap-3 shrink-0 ml-4">
                   <ImageBuildStatus
                     isEnabled={isEnabled}
                     image={

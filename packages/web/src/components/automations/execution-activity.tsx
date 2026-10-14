@@ -55,7 +55,7 @@ export function ExecutionActivity({ executions }: { executions: AutomationExecut
         return (
           <li
             key={execution.id}
-            className={`flex h-4 w-2 items-center justify-center rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-ring ${TONE_CLASSES[presentation.tone]}`}
+            className={`flex h-4 w-2 items-center justify-center rounded-sm outline-hidden focus-visible:ring-1 focus-visible:ring-ring ${TONE_CLASSES[presentation.tone]}`}
             title={`${presentation.label} - ${occurredAt}`}
             aria-label={`${presentation.label}, ${occurredAt}`}
             data-status-shape={execution.status}

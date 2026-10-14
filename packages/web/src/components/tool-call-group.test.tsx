@@ -8,7 +8,7 @@ import { ToolCallGroup } from "./tool-call-group";
 afterEach(cleanup);
 
 describe("ToolCallGroup", () => {
-  it("aligns grouped action icons with the text", () => {
+  it("summarizes grouped calls on one expandable trace line", () => {
     const events: Array<Extract<SandboxEvent, { type: "tool_call" }>> = [
       {
         type: "tool_call",
@@ -41,9 +41,11 @@ describe("ToolCallGroup", () => {
     );
 
     const button = screen.getByRole("button", { name: /Bash 2 commands/ });
-    const icons = button.querySelectorAll("svg");
+    const icons = button.querySelectorAll("[data-slot=trace-icon]");
 
+    // The tool icon leads the line and the disclosure chevron trails it.
     expect(icons).toHaveLength(2);
-    expect([...icons].every((icon) => icon.classList.contains("mt-[3px]"))).toBe(true);
+    expect([...icons].every((icon) => icon.querySelector("svg"))).toBe(true);
+    expect(button).toHaveAttribute("aria-expanded", "false");
   });
 });

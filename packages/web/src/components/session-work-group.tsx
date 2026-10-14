@@ -1,7 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ChevronRightIcon } from "@/components/ui/icons";
+import { ListChecksIcon } from "lucide-react";
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "@/components/ui/trace";
 
 function formatDuration(durationMs: number): string {
   const totalSeconds = Math.round(durationMs / 1000);
@@ -15,6 +24,10 @@ function formatDuration(durationMs: number): string {
     .join(" ");
 }
 
+/**
+ * The work an agent did for one turn, following the AI Elements Chain of
+ * Thought pattern: a summary line that expands into every step it took.
+ */
 export function SessionWorkGroup({
   durationMs,
   isExpanded,
@@ -29,23 +42,20 @@ export function SessionWorkGroup({
   const label = `Worked for ${formatDuration(durationMs)}`;
 
   return (
-    <div className="py-1">
-      <button
-        type="button"
-        aria-expanded={isExpanded}
-        onClick={onToggle}
-        className="flex w-full items-center gap-1.5 px-1 py-1.5 text-left text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <span>{label}</span>
-        <ChevronRightIcon
-          className={`h-4 w-4 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
-            isExpanded ? "rotate-90" : ""
-          }`}
-        />
-      </button>
-      {isExpanded && (
-        <div className="ml-[7px] space-y-1.5 border-l border-border pb-2 pl-4 pt-1">{children}</div>
-      )}
-    </div>
+    <Trace className="py-1">
+      <TraceCollapsible open={isExpanded} onOpenChange={onToggle}>
+        <TraceCollapsibleTrigger>
+          <TraceLine>
+            <TraceIcon>
+              <ListChecksIcon />
+            </TraceIcon>
+            <TraceTitle className="font-medium">{label}</TraceTitle>
+          </TraceLine>
+        </TraceCollapsibleTrigger>
+        <TraceCollapsibleContent className="flex flex-col gap-2">
+          {children}
+        </TraceCollapsibleContent>
+      </TraceCollapsible>
+    </Trace>
   );
 }

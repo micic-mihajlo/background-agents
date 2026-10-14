@@ -196,7 +196,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                   } ${sidebar.isOpen ? "translate-x-0" : "-translate-x-full"}`
                 : `transition-[width] duration-200 ease-in-out-strong motion-reduce:transition-none ${
                     sidebar.isOpen ? "w-72" : "w-0"
-                  } flex-shrink-0 overflow-hidden`
+                  } shrink-0 overflow-hidden`
             }
             style={
               isMobile && !sidebar.isOpen && sidebarPull.dragDistance > 0

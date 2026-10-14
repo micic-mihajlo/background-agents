@@ -57,7 +57,7 @@ export function MemoryCard({
         </p>
       </div>
       <p className="text-sm text-muted-foreground">{record.description}</p>
-      <pre className="max-h-60 overflow-auto whitespace-pre-wrap break-words text-sm">
+      <pre className="max-h-60 overflow-auto whitespace-pre-wrap wrap-break-word text-sm">
         {record.content}
       </pre>
       {record.archiveKind && (

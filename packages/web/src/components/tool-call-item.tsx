@@ -3,110 +3,164 @@
 import type { SandboxEvent } from "@/types/session";
 import { formatSessionEventTime } from "@/lib/time";
 import { formatToolCall } from "@/lib/tool-formatters";
+import { extractLatestTasks } from "@/lib/tasks";
 import { SlackNotifyEvent } from "./slack-notify-event";
 import { CreatePullRequestEvent } from "./create-pull-request-event";
-import { TimelineRowContent } from "./timeline-row-content";
 import {
-  ChevronRightIcon,
-  FileIcon,
-  PencilIcon,
-  PlusIcon,
-  TerminalIcon,
-  SearchIcon,
-  FolderIcon,
-  BoxIcon,
-  GlobeIcon,
-} from "@/components/ui/icons";
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceDescription,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "@/components/ui/trace";
+import {
+  DiffCodeBlock,
+  HighlightedCodeBlock,
+  TodoTrace,
+  ToolIcon,
+  languageForPath,
+  toolTraceStatus,
+} from "@/components/tool-call-presentation";
+
+type ToolCallEvent = Extract<SandboxEvent, { type: "tool_call" }>;
 
 interface ToolCallItemProps {
-  event: Extract<SandboxEvent, { type: "tool_call" }>;
+  event: ToolCallEvent;
   isExpanded: boolean;
   onToggle: () => void;
   showTime?: boolean;
 }
 
-function ToolIcon({ name }: { name: string | null }) {
-  if (!name) return null;
-
-  const iconClass = "mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground";
-
-  switch (name) {
-    case "file":
-      return <FileIcon className={iconClass} />;
-    case "pencil":
-      return <PencilIcon className={iconClass} />;
-    case "plus":
-      return <PlusIcon className={iconClass} />;
-    case "terminal":
-      return <TerminalIcon className={iconClass} />;
-    case "search":
-      return <SearchIcon className={iconClass} />;
-    case "folder":
-      return <FolderIcon className={iconClass} />;
-    case "box":
-      return <BoxIcon className={iconClass} />;
-    case "globe":
-      return <GlobeIcon className={iconClass} />;
-    default:
-      return null;
+function stringArg(args: Record<string, unknown> | undefined, ...keys: string[]): string | null {
+  for (const key of keys) {
+    const value = args?.[key];
+    if (typeof value === "string") return value;
   }
+  return null;
 }
 
-function ToolCallDetails({ event }: { event: ToolCallItemProps["event"] }) {
-  const formatted = formatToolCall(event);
-  const isApplyPatch = event.tool?.toLowerCase() === "apply_patch";
-  const truncatedArgs = event.truncated?.fields.some((field) => field.startsWith("args."));
-  const truncatedOutput = event.truncated?.fields.includes("output");
-  const { args, output } = formatted.getDetails();
-  const patchText = isApplyPatch && typeof args?.patchText === "string" ? args.patchText : null;
-  const nonPatchArgs =
-    isApplyPatch && args
-      ? Object.fromEntries(Object.entries(args).filter(([key]) => key !== "patchText"))
-      : args;
-  const hasNonPatchArgs = !!nonPatchArgs && Object.keys(nonPatchArgs).length > 0;
+function truncationNotice(event: ToolCallEvent): string | null {
+  if (!event.truncated) return null;
+  const truncatedArgs = event.truncated.fields.some((field) => field.startsWith("args."));
+  const truncatedOutput = event.truncated.fields.includes("output");
+  if (truncatedArgs && truncatedOutput) return "Arguments and output were truncated.";
+  return truncatedArgs ? "Arguments were truncated." : "Output was truncated.";
+}
+
+/**
+ * Details for an expanded tool call, following the AI Elements Tool and
+ * Terminal patterns: commands show their output, edits show a diff, file
+ * reads and writes are highlighted, and todo lists render as a queue.
+ */
+function ToolCallDetails({ event }: { event: ToolCallEvent }) {
+  const tool = event.tool?.toLowerCase() ?? "";
+  const { args, output } = formatToolCall(event).getDetails();
+  const notice = truncationNotice(event);
+  const failed = event.status === "error";
+  const filePath = stringArg(args, "filePath", "file_path", "notebook_path", "notebookPath");
+  const blocks: React.ReactNode[] = [];
+
+  if (tool === "bash") {
+    const command = stringArg(args, "command") ?? "";
+    blocks.push(
+      <HighlightedCodeBlock
+        key="terminal"
+        title="Output"
+        code={`$ ${command}${output ? `\n${output}` : ""}`}
+        language="ansi"
+        variant={failed ? "destructive" : "default"}
+        copyable
+      />
+    );
+  } else if (tool === "apply_patch" && typeof args?.patchText === "string") {
+    blocks.push(<DiffCodeBlock key="patch" title="Patch" patch={args.patchText} />);
+  } else if (tool === "edit" || tool === "multiedit") {
+    const edits = Array.isArray(args?.edits)
+      ? (args.edits as Record<string, unknown>[])
+      : [args ?? {}];
+    edits.forEach((edit, index) => {
+      const oldText = stringArg(edit, "oldString", "old_string");
+      const newText = stringArg(edit, "newString", "new_string");
+      if (oldText !== null || newText !== null) {
+        blocks.push(
+          <DiffCodeBlock
+            key={`edit:${index}`}
+            title={filePath ?? "Edit"}
+            oldText={oldText ?? ""}
+            newText={newText ?? ""}
+          />
+        );
+      }
+    });
+  } else if (tool === "write") {
+    const content = stringArg(args, "content");
+    if (content !== null) {
+      blocks.push(
+        <HighlightedCodeBlock
+          key="write"
+          title={filePath ?? "Write"}
+          code={content}
+          language={languageForPath(filePath)}
+          copyable
+        />
+      );
+    }
+  } else if (tool === "todowrite") {
+    const todos = extractLatestTasks([event]);
+    if (todos.length > 0) blocks.push(<TodoTrace key="todos" todos={todos} />);
+  } else if (tool === "read" && output) {
+    blocks.push(
+      <HighlightedCodeBlock
+        key="read"
+        title={filePath ?? "Output"}
+        code={output}
+        language={languageForPath(filePath)}
+        copyable
+      />
+    );
+  }
+
+  // Tools without a dedicated view show their raw arguments and output.
+  if (blocks.length === 0) {
+    if (args && Object.keys(args).length > 0) {
+      blocks.push(
+        <HighlightedCodeBlock
+          key="args"
+          title="Arguments"
+          code={JSON.stringify(args, null, 2)}
+          language="json"
+        />
+      );
+    }
+  }
+  const outputShown = tool === "bash" || tool === "read" || tool === "todowrite";
+  if (output && !outputShown) {
+    blocks.push(
+      <HighlightedCodeBlock
+        key="output"
+        title="Output"
+        code={output}
+        variant={failed ? "destructive" : "default"}
+        copyable
+      />
+    );
+  }
 
   return (
-    <div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border-muted bg-panel p-3 font-mono text-xs">
-      {event.truncated && (
-        <p className="mb-2 text-muted-foreground">
-          {truncatedArgs && truncatedOutput
-            ? "Arguments and output were truncated."
-            : truncatedArgs
-              ? "Arguments were truncated."
-              : "Output was truncated."}
-        </p>
-      )}
-      {hasNonPatchArgs && (
-        <div className="mb-2 min-w-0 max-w-full">
-          <div className="text-muted-foreground mb-1 font-medium">Arguments:</div>
-          <pre className="w-full max-w-full overflow-x-auto whitespace-pre text-foreground">
-            {JSON.stringify(nonPatchArgs, null, 2)}
-          </pre>
-        </div>
-      )}
-      {patchText && (
-        <div className="mb-2 min-w-0 max-w-full">
-          <div className="text-muted-foreground mb-1 font-medium">Patch:</div>
-          <pre className="max-h-64 w-full max-w-full overflow-x-auto whitespace-pre text-foreground">
-            {patchText}
-          </pre>
-        </div>
-      )}
-      {output && (
-        <div className="min-w-0 max-w-full">
-          <div className="text-muted-foreground mb-1 font-medium">Output:</div>
-          <pre className="max-h-48 w-full max-w-full overflow-x-auto whitespace-pre text-foreground">
-            {output}
-          </pre>
-        </div>
-      )}
-      {!hasNonPatchArgs && !patchText && !output && (
-        <span className="text-secondary-foreground">No details available</span>
+    <div className="flex min-w-0 flex-col gap-2">
+      {notice && <p className="text-xs text-muted-foreground">{notice}</p>}
+      {blocks}
+      {blocks.length === 0 && (
+        <span className="text-xs text-secondary-foreground">No details available</span>
       )}
     </div>
   );
 }
 
+/** One tool call as a trace line that expands into its details. */
 export function ToolCallItem({ event, isExpanded, onToggle, showTime = true }: ToolCallItemProps) {
   if (event.tool?.toLowerCase() === "create-pull-request" && !event.truncated) {
     return (
@@ -131,34 +185,32 @@ export function ToolCallItem({ event, isExpanded, onToggle, showTime = true }: T
   }
 
   const formatted = formatToolCall(event);
-  const time = formatSessionEventTime(event.timestamp);
+  const icon = event.tool?.toLowerCase() === "todowrite" ? "todo" : formatted.icon;
+  const status = toolTraceStatus(event.status);
 
   return (
-    <div className="min-w-0 max-w-full py-0.5">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full min-w-0 items-start gap-1.5 text-left text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ChevronRightIcon
-          className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
-            isExpanded ? "rotate-90" : ""
-          }`}
-        />
-        <ToolIcon name={formatted.icon} />
-        <TimelineRowContent time={showTime ? time : undefined}>
-          <span className="block truncate">
-            {formatted.toolName} {formatted.summary}
-            {event.truncated && " (truncated)"}
-          </span>
-        </TimelineRowContent>
-      </button>
-
-      {isExpanded && (
-        <div className="mt-2 min-w-0 w-full max-w-full sm:ml-5 sm:w-[calc(100%_-_1.25rem)]">
+    <Trace>
+      <TraceCollapsible open={isExpanded} onOpenChange={onToggle}>
+        <TraceCollapsibleTrigger className="w-full">
+          <TraceLine status={status} className="w-full">
+            <TraceIcon>
+              <ToolIcon name={icon} status={status} />
+            </TraceIcon>
+            <TraceTitle>
+              {formatted.toolName} {formatted.summary}
+              {event.truncated && " (truncated)"}
+            </TraceTitle>
+            {showTime && (
+              <TraceDescription className="ml-auto pl-2 text-xs">
+                {formatSessionEventTime(event.timestamp)}
+              </TraceDescription>
+            )}
+          </TraceLine>
+        </TraceCollapsibleTrigger>
+        <TraceCollapsibleContent>
           <ToolCallDetails event={event} />
-        </div>
-      )}
-    </div>
+        </TraceCollapsibleContent>
+      </TraceCollapsible>
+    </Trace>
   );
 }

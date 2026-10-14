@@ -43,12 +43,16 @@ describe("ToolCallItem", () => {
     const button = screen.getByRole("button", { name: new RegExp(command) });
     expect(button).toHaveTextContent(command);
     expect(button.querySelector(".truncate")).toHaveTextContent(`Bash ${command}`);
+    // The tool icon and the disclosure chevron are decorative.
+    expect(button.querySelectorAll("svg").length).toBeGreaterThan(0);
     expect(
-      [...button.querySelectorAll("svg")].every((icon) => icon.classList.contains("mt-[3px]"))
+      [...button.querySelectorAll("[data-slot=trace-icon]")].every(
+        (icon) => icon.getAttribute("aria-hidden") === "true"
+      )
     ).toBe(true);
   });
 
-  it("keeps long TodoWrite arguments in a contained horizontal scroller", () => {
+  it("renders TodoWrite todos as a queue with long items truncated in place", () => {
     const content = `implement-${"unbroken-task-description".repeat(20)}`;
     const args = {
       todos: [{ content, status: "in_progress", priority: "high" }],
@@ -65,9 +69,9 @@ describe("ToolCallItem", () => {
 
     render(<ToolCallItem event={event} isExpanded onToggle={() => {}} />);
 
-    const argumentsPre = screen.getByText("Arguments:").nextElementSibling;
-    expect(argumentsPre?.textContent).toBe(JSON.stringify(args, null, 2));
-    expect(argumentsPre).toHaveClass("w-full", "max-w-full", "overflow-x-auto", "whitespace-pre");
+    const todo = screen.getByText(content);
+    expect(todo).toHaveClass("truncate");
+    expect(todo.closest("[data-slot=trace-line]")).toHaveAttribute("data-status", "running");
   });
 
   it("keeps Apply Patch content preformatted and horizontally scrollable", () => {
@@ -84,10 +88,21 @@ describe("ToolCallItem", () => {
 
     render(<ToolCallItem event={event} isExpanded onToggle={() => {}} />);
 
-    const patchPre = screen.getByText("Patch:").nextElementSibling;
-    expect(patchPre?.textContent).toBe(patchText);
-    expect(patchPre).toHaveClass("overflow-x-auto", "whitespace-pre");
-    expect(patchPre).not.toHaveClass("whitespace-pre-wrap", "[overflow-wrap:anywhere]");
+    const patchBlock = screen.getByText("Patch").closest("[data-slot=code-block]");
+    const patchPre = patchBlock?.querySelector("pre");
+    const lines = [...(patchPre?.querySelectorAll("[data-slot=code-block-line]") ?? [])];
+    expect(lines.map((line) => line.getAttribute("data-variant"))).toEqual([
+      "default",
+      "default",
+      "removed",
+      "added",
+      "default",
+    ]);
+    expect(lines[2]).toHaveTextContent("old".repeat(80));
+    expect(lines[3]).toHaveTextContent("new".repeat(80));
+    // Long lines scroll horizontally instead of wrapping.
+    expect(patchPre).toHaveClass("overflow-auto");
+    expect(patchPre).not.toHaveAttribute("data-wrap");
   });
 
   it("keeps Bash output preformatted and horizontally scrollable", () => {
@@ -105,10 +120,14 @@ describe("ToolCallItem", () => {
 
     render(<ToolCallItem event={event} isExpanded onToggle={() => {}} />);
 
-    const outputPre = screen.getByText("Output:").nextElementSibling;
-    expect(outputPre?.textContent).toBe(output);
-    expect(outputPre).toHaveClass("overflow-x-auto", "whitespace-pre");
-    expect(outputPre).not.toHaveClass("whitespace-pre-wrap", "[overflow-wrap:anywhere]");
+    const outputPre = screen
+      .getByText("Output")
+      .closest("[data-slot=code-block]")
+      ?.querySelector("pre");
+    const lines = [...(outputPre?.querySelectorAll("[data-slot=code-block-line]") ?? [])];
+    expect(lines.map((line) => line.textContent)).toEqual(["$ print-table", output]);
+    expect(outputPre).toHaveClass("overflow-auto");
+    expect(outputPre).not.toHaveAttribute("data-wrap");
   });
 
   it("uses the rich renderer for create-pull-request regardless of tool name casing", () => {

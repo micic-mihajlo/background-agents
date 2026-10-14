@@ -100,7 +100,7 @@ export function SessionPromptComposer({
   }, [prompt.inputRef, prompt.value]);
 
   return (
-    <footer className="min-w-0 flex-shrink-0">
+    <footer className="min-w-0 shrink-0">
       <form onSubmit={prompt.onSubmit} className="w-full min-w-0 max-w-3xl mx-auto px-4 pt-2 pb-4">
         {/* Action bar above input */}
         <div className="hidden mb-3 md:block">
@@ -143,7 +143,7 @@ export function SessionPromptComposer({
             onPaste={handlePaste}
             autoComplete="off"
             placeholder={prompt.isProcessing ? "Add a follow-up..." : "Ask or build anything"}
-            className="block min-h-12 max-h-40 w-full resize-none overflow-y-auto bg-transparent px-4 pt-3 pb-1 leading-6 text-foreground placeholder:text-secondary-foreground focus:outline-none sm:min-h-[4.5rem]"
+            className="block min-h-12 max-h-40 w-full resize-none overflow-y-auto bg-transparent px-4 pt-3 pb-1 leading-6 text-foreground placeholder:text-secondary-foreground focus:outline-hidden sm:min-h-18"
             rows={1}
           />
 
@@ -197,7 +197,7 @@ export function SessionPromptComposer({
               <button
                 type="submit"
                 disabled={sendDisabled}
-                className="flex h-8 min-w-8 items-center justify-center gap-1 rounded-lg bg-accent px-2 text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10 transition-[background-color,box-shadow,transform] duration-150 ease-out-strong hover:bg-accent/90 active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-muted disabled:text-secondary-foreground disabled:shadow-none disabled:ring-0"
+                className="flex h-8 min-w-8 items-center justify-center gap-1 rounded-lg bg-accent px-2 text-accent-foreground shadow-xs ring-1 ring-inset ring-black/10 transition-[background-color,box-shadow,transform] duration-150 ease-out-strong hover:bg-accent/90 active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-muted disabled:text-secondary-foreground disabled:shadow-none disabled:ring-0"
                 title={
                   prompt.isProcessing
                     ? "Queue follow-up; runs after the current prompt"

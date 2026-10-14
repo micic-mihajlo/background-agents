@@ -492,7 +492,7 @@ describe("Home", () => {
     // Each target trigger shows a leading kind icon and a trailing chevron.
     expect(repository.querySelectorAll("svg")).toHaveLength(2);
     expect(branch.closest("button")?.querySelectorAll("svg")).toHaveLength(2);
-    expect(branch).toHaveClass("max-w-[9rem]", "truncate");
+    expect(branch).toHaveClass("max-w-36", "truncate");
     expect(screen.queryByText("build agent")).not.toBeInTheDocument();
   });
 

@@ -10,6 +10,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { CollapsedSidebarControls, useSidebarContext } from "@/components/sidebar-layout";
 import { ErrorBanner } from "@/components/ui/error-banner";
+import { Button } from "@/components/ui/button";
 import { SessionAccessSelector } from "@/components/session-access-selector";
 import { matchesShortcut } from "@/lib/keyboard-shortcuts";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
@@ -109,6 +110,15 @@ function skillPreviewTarget(
     ? { repoOwner: fields.repoOwner, repoName: fields.repoName }
     : {};
 }
+
+/** One-click starters, following the AI Elements Suggestion pattern. They fill the prompt. */
+const PROMPT_SUGGESTIONS = [
+  "Fix the failing tests",
+  "Find and fix a bug in recent commits",
+  "Add tests for untested code",
+  "Update outdated dependencies",
+  "Explain how this codebase is structured",
+];
 
 export default function Home() {
   const { data: session } = useAuthSession();
@@ -622,7 +632,7 @@ function HomeContent({
     <div className="h-full flex flex-col">
       {/* Header with toggle when sidebar is closed */}
       {!isOpen && (
-        <header className="border-b border-border-muted flex-shrink-0">
+        <header className="border-b border-border-muted shrink-0">
           <div className="px-4 py-3">
             <CollapsedSidebarControls />
           </div>
@@ -630,10 +640,10 @@ function HomeContent({
       )}
 
       <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-4 py-8 sm:px-8">
-        <div className="w-full max-w-[44rem] -mt-[8vh]">
+        <div className="w-full max-w-176 mt-[-8vh]">
           {/* Welcome text */}
           <div className="text-center mb-7">
-            <div className="mx-auto mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+            <div className="mx-auto mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-xs ring-1 ring-inset ring-black/10">
               <AppIcon className="h-5 w-5" />
             </div>
             <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-foreground mb-1.5">
@@ -706,7 +716,7 @@ function HomeContent({
                   placeholder="What do you want to build?"
                   autoFocus
                   autoComplete="off"
-                  className="block w-full min-h-[96px] resize-none bg-transparent px-4 pt-3.5 pb-2 text-[15px] leading-6 text-foreground placeholder:text-secondary-foreground focus:outline-none disabled:opacity-50"
+                  className="block w-full min-h-[96px] resize-none bg-transparent px-4 pt-3.5 pb-2 text-[15px] leading-6 text-foreground placeholder:text-secondary-foreground focus:outline-hidden disabled:opacity-50"
                   rows={3}
                 />
 
@@ -777,7 +787,7 @@ function HomeContent({
                         !isLaunchable ||
                         !teamCreationReady
                       }
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10 transition-[background-color,box-shadow,transform] duration-150 ease-out-strong hover:bg-accent/90 active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-muted disabled:text-secondary-foreground disabled:shadow-none disabled:ring-0"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground shadow-xs ring-1 ring-inset ring-black/10 transition-[background-color,box-shadow,transform] duration-150 ease-out-strong hover:bg-accent/90 active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-muted disabled:text-secondary-foreground disabled:shadow-none disabled:ring-0"
                       title={`Send (${labels["send-prompt"]})`}
                       aria-label={`Send (${labels["send-prompt"]})`}
                     >
@@ -790,6 +800,30 @@ function HomeContent({
                   </div>
                 </div>
               </div>
+
+              {!prompt && (
+                <div
+                  aria-label="Suggested prompts"
+                  className="mt-3 flex scroll-fade-x no-scrollbar gap-2 overflow-x-auto overscroll-x-contain"
+                >
+                  {PROMPT_SUGGESTIONS.map((suggestion) => (
+                    <Button
+                      key={suggestion}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 rounded-full font-normal text-muted-foreground"
+                      disabled={creating}
+                      onClick={() => {
+                        handlePromptChange(suggestion);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              )}
 
               <SessionAccessSelector
                 teamId={teamId}

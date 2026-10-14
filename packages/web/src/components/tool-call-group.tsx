@@ -3,35 +3,24 @@
 import { memo } from "react";
 import type { SandboxEvent } from "@/types/session";
 import { formatSessionEventTime } from "@/lib/time";
-import { formatToolGroup } from "@/lib/tool-formatters";
+import { formatToolCall, formatToolGroup } from "@/lib/tool-formatters";
 import { toolCallKey } from "@/lib/timeline-items";
 import { ToolCallItem } from "./tool-call-item";
-import { TimelineRowContent } from "./timeline-row-content";
 import {
-  ChevronRightIcon,
-  FileIcon,
-  PencilIcon,
-  TerminalIcon,
-  BoltIcon,
-} from "@/components/ui/icons";
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceDescription,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "@/components/ui/trace";
+import { ToolIcon, toolTraceStatus } from "@/components/tool-call-presentation";
 
-function ToolIcon({ toolName }: { toolName: string }) {
-  const iconClass = "mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground";
+type ToolCallEvent = Extract<SandboxEvent, { type: "tool_call" }>;
 
-  switch (toolName) {
-    case "Read":
-      return <FileIcon className={iconClass} />;
-    case "Edit":
-      return <PencilIcon className={iconClass} />;
-    case "Apply Patch":
-      return <PencilIcon className={iconClass} />;
-    case "Bash":
-      return <TerminalIcon className={iconClass} />;
-    default:
-      return <BoltIcon className={iconClass} />;
-  }
-}
-
+/** Consecutive calls to the same tool, summarized on one line that expands into each call. */
 export const ToolCallGroup = memo(
   function ToolCallGroup({
     events,
@@ -40,15 +29,14 @@ export const ToolCallGroup = memo(
     onToggleGroup,
     onToggleTool,
   }: {
-    events: Array<Extract<SandboxEvent, { type: "tool_call" }>>;
+    events: ToolCallEvent[];
     isExpanded: boolean;
     expandedToolCallIds: ReadonlySet<string>;
     onToggleGroup: () => void;
-    onToggleTool: (event: Extract<SandboxEvent, { type: "tool_call" }>) => void;
+    onToggleTool: (event: ToolCallEvent) => void;
   }) {
     const formatted = formatToolGroup(events);
     const firstEvent = events[0];
-    const time = formatSessionEventTime(firstEvent.timestamp);
 
     // For single tool call, render directly without group wrapper
     if (events.length === 1) {
@@ -61,27 +49,30 @@ export const ToolCallGroup = memo(
       );
     }
 
-    return (
-      <div className="py-1">
-        <button
-          type="button"
-          onClick={onToggleGroup}
-          className="-mx-2 flex w-full min-w-0 items-start gap-2 rounded-md px-2 py-1 text-left text-[13px] transition-colors hover:bg-muted"
-        >
-          <ChevronRightIcon
-            className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
-              isExpanded ? "rotate-90" : ""
-            }`}
-          />
-          <ToolIcon toolName={formatted.toolName} />
-          <TimelineRowContent time={time}>
-            <span className="font-medium text-foreground">{formatted.toolName}</span>{" "}
-            <span className="text-muted-foreground">{formatted.summary}</span>
-          </TimelineRowContent>
-        </button>
+    const statuses = events.map((event) => toolTraceStatus(event.status));
+    const status = statuses.includes("running")
+      ? "running"
+      : statuses.includes("error")
+        ? "error"
+        : undefined;
 
-        {isExpanded && (
-          <div className="ml-2 mt-1 border-l border-border pl-2 sm:ml-4">
+    return (
+      <Trace>
+        <TraceCollapsible open={isExpanded} onOpenChange={onToggleGroup}>
+          <TraceCollapsibleTrigger className="w-full">
+            <TraceLine status={status} className="w-full">
+              <TraceIcon>
+                <ToolIcon name={formatToolCall(firstEvent).icon} status={status} />
+              </TraceIcon>
+              <TraceTitle>
+                {formatted.toolName} {formatted.summary}
+              </TraceTitle>
+              <TraceDescription className="ml-auto pl-2 text-xs">
+                {formatSessionEventTime(firstEvent.timestamp)}
+              </TraceDescription>
+            </TraceLine>
+          </TraceCollapsibleTrigger>
+          <TraceCollapsibleContent className="flex flex-col gap-2">
             {events.map((event) => (
               <ToolCallItem
                 key={toolCallKey(event)}
@@ -91,9 +82,9 @@ export const ToolCallGroup = memo(
                 showTime={false}
               />
             ))}
-          </div>
-        )}
-      </div>
+          </TraceCollapsibleContent>
+        </TraceCollapsible>
+      </Trace>
     );
   },
   (prev, next) =>
