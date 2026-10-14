@@ -45,7 +45,7 @@ export default async function LoginPage() {
     <main className="min-h-screen flex flex-col items-center justify-center bg-shell px-6">
       <div className="w-full max-w-sm rounded-xl border border-border-muted bg-background p-8 shadow-overlay">
         <div className="mb-6 space-y-2 text-center">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-xs ring-1 ring-inset ring-black/10">
             <AppIcon className="h-5 w-5" />
           </div>
           <h1 className="text-xl font-semibold tracking-tight text-foreground">

@@ -149,7 +149,7 @@ export function SafeMarkdown({
 }: SafeMarkdownProps) {
   return (
     <div
-      className={`prose prose-sm dark:prose-invert min-w-0 max-w-none break-words [overflow-wrap:anywhere] ${className}`}
+      className={`prose prose-sm dark:prose-invert min-w-0 max-w-none wrap-break-word wrap-anywhere ${className}`}
     >
       <ReactMarkdown
         remarkPlugins={linkRepositoryFiles ? [remarkGfm, preserveFileLineReferences] : [remarkGfm]}

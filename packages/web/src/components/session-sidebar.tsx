@@ -303,7 +303,7 @@ export function SessionSidebar({
             onClick={handleNavigationSelect}
             className="flex min-w-0 items-center gap-2 rounded-md px-1 py-1 text-sm font-semibold tracking-tight text-foreground transition hover:bg-muted"
           >
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground shadow-xs ring-1 ring-inset ring-black/10">
               <AppIcon className="h-3.5 w-3.5" />
             </span>
             <span className="truncate">{APP_NAME}</span>

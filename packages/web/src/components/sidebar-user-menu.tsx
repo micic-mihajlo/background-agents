@@ -20,7 +20,7 @@ export function UserMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-left text-[13px] font-medium text-foreground transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+          className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-left text-[13px] font-medium text-foreground transition hover:bg-muted focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/40"
           aria-label={`Signed in as ${user?.name || "User"}`}
           title={`Signed in as ${user?.name || "User"}`}
         >

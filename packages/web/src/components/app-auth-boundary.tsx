@@ -41,7 +41,7 @@ export function AppAuthBoundary({ children }: { children: React.ReactNode }) {
   if (status === "unauthenticated") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-5 bg-shell px-6">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-sm ring-1 ring-inset ring-black/10">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-xs ring-1 ring-inset ring-black/10">
           <AppIcon className="h-5 w-5" />
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{APP_NAME}</h1>

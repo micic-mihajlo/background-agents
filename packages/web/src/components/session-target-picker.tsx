@@ -47,7 +47,7 @@ export function SessionTargetPicker({
         triggerClassName="flex h-7 max-w-full items-center gap-1.5 rounded-md border border-border-muted bg-card px-2.5 text-[13px] font-medium text-foreground/80 shadow-card transition hover:border-border hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <RepoIcon className="h-3.5 w-3.5 shrink-0 text-secondary-foreground" />
-        <span className="truncate max-w-[12rem] sm:max-w-none">
+        <span className="truncate max-w-48 sm:max-w-none">
           {loadingRepos ? "Loading..." : displayTargetName}
         </span>
         <ChevronDownIcon className="w-3 h-3 shrink-0 text-secondary-foreground" />
@@ -111,7 +111,7 @@ export function SessionTargetPicker({
           triggerClassName="flex h-7 max-w-full items-center gap-1.5 rounded-md border border-border-muted bg-card px-2.5 text-[13px] font-medium text-foreground/80 shadow-card transition hover:border-border hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <BranchIcon className="h-3.5 w-3.5 shrink-0 text-secondary-foreground" />
-          <span className="max-w-[9rem] truncate">
+          <span className="max-w-36 truncate">
             {loadingBranches ? "Loading..." : selectedBranch || "branch"}
           </span>
           <ChevronDownIcon className="w-3 h-3 shrink-0 text-secondary-foreground" />
