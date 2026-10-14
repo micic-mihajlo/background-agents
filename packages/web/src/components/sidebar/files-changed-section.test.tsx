@@ -93,11 +93,15 @@ describe("FilesChangedSection", () => {
     expect(screen.getByText("Repository checkout is unavailable")).toBeVisible();
   });
 
-  it("shows each file's folder under its name without losing disambiguated labels", () => {
+  it("groups files into a folder tree without losing disambiguated labels", () => {
     render(<FilesChangedSection repositories={repositories} onSelect={vi.fn()} />);
 
-    expect(screen.getByText("packages/web")).toBeVisible();
-    expect(screen.getByText("packages/api")).toBeVisible();
+    expect(screen.getByRole("button", { name: "packages" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "web" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "api" })).toBeVisible();
     expect(screen.getByRole("button", { name: /web\/index\.ts.*modified/ })).toHaveAttribute(
       "title",
       "packages/web/index.ts"

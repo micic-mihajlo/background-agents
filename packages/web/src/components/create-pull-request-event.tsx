@@ -8,17 +8,19 @@ import {
 import type { SandboxEvent } from "@/types/session";
 import { formatSessionEventTime } from "@/lib/time";
 import { getSafeExternalUrl } from "@/lib/urls";
-import {
-  BranchIcon,
-  ChevronRightIcon,
-  ErrorIcon,
-  GitPrDraftIcon,
-  GitPrIcon,
-  LinkIcon,
-} from "@/components/ui/icons";
+import { BranchIcon, ErrorIcon, GitPrDraftIcon, GitPrIcon, LinkIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { SafeMarkdown } from "./safe-markdown";
-import { TimelineRowContent } from "./timeline-row-content";
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceDescription,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "@/components/ui/trace";
 
 type ToolCallEvent = Extract<SandboxEvent, { type: "tool_call" }>;
 
@@ -366,38 +368,34 @@ export function CreatePullRequestEvent({
   const presentation = presentationForResult(result);
   const time = formatSessionEventTime(event.timestamp);
 
-  return (
-    <div className="min-w-0 max-w-full py-0.5">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full min-w-0 items-start gap-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ChevronRightIcon
-          className={cn(
-            "mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200",
-            isExpanded && "rotate-90"
-          )}
-        />
-        {presentation.icon === "error" ? (
-          <ErrorIcon className="mt-[3px] h-3.5 w-3.5 shrink-0 text-destructive" />
-        ) : presentation.icon === "draft" ? (
-          <GitPrDraftIcon className="mt-[3px] h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        ) : (
-          <GitPrIcon className="mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground" />
-        )}
-        <TimelineRowContent time={showTime ? time : undefined}>
-          <span className={cn(presentation.tone === "success" && "text-foreground")}>
-            {presentation.summary}
-          </span>
-        </TimelineRowContent>
-      </button>
+  const status = presentation.icon === "error" ? "error" : undefined;
 
-      {isExpanded && (
-        <div className="mt-2 min-w-0 w-full max-w-full sm:ml-5 sm:w-[calc(100%-1.25rem)]">
+  return (
+    <Trace>
+      <TraceCollapsible open={isExpanded} onOpenChange={onToggle}>
+        <TraceCollapsibleTrigger className="w-full">
+          <TraceLine status={status} className="w-full">
+            <TraceIcon>
+              {presentation.icon === "error" ? (
+                <ErrorIcon />
+              ) : presentation.icon === "draft" ? (
+                <GitPrDraftIcon />
+              ) : (
+                <GitPrIcon className={cn(presentation.tone === "success" && "text-success")} />
+              )}
+            </TraceIcon>
+            <TraceTitle className={cn(presentation.tone === "success" && "text-foreground")}>
+              {presentation.summary}
+            </TraceTitle>
+            {showTime && (
+              <TraceDescription className="ml-auto pl-2 text-xs">{time}</TraceDescription>
+            )}
+          </TraceLine>
+        </TraceCollapsibleTrigger>
+        <TraceCollapsibleContent>
           <PullRequestCard event={event} presentation={presentation} />
-        </div>
-      )}
-    </div>
+        </TraceCollapsibleContent>
+      </TraceCollapsible>
+    </Trace>
   );
 }

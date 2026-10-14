@@ -407,7 +407,7 @@ describe("tool call groups", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Read 2 files/i }));
     await userEvent.click(screen.getByRole("button", { name: /Read one\.ts/i }));
-    expect(screen.getByText("Arguments:")).toBeInTheDocument();
+    expect(screen.getByText("Arguments")).toBeInTheDocument();
 
     rerender(
       <SessionTimeline
@@ -417,7 +417,7 @@ describe("tool call groups", () => {
     );
 
     expect(screen.getByRole("button", { name: /Read one\.ts/i })).toBeInTheDocument();
-    expect(screen.getByText("Arguments:")).toBeInTheDocument();
+    expect(screen.getByText("Arguments")).toBeInTheDocument();
   });
 });
 
@@ -454,8 +454,9 @@ describe("task activity grouping", () => {
     expect(indicator).toHaveClass("sr-only");
     expect(indicator).toHaveTextContent("Task in progress");
     expect(indicator.closest("button")).toBeNull();
-    expect(container.querySelector("button [aria-hidden='true'].animate-pulse")).toHaveClass(
-      "bg-accent"
+    expect(container.querySelector("button [data-slot=trace-line]")).toHaveAttribute(
+      "data-status",
+      "running"
     );
 
     rerender(
@@ -472,7 +473,9 @@ describe("task activity grouping", () => {
     );
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
-    expect(container.querySelector("button [aria-hidden='true'].animate-pulse")).toBeNull();
+    expect(container.querySelector("button [data-slot=trace-line]")).not.toHaveAttribute(
+      "data-status"
+    );
   });
 
   it("nests child tools beneath their Task and keeps parallel Tasks separate", () => {
@@ -703,9 +706,10 @@ describe("task activity grouping", () => {
 
     await user.click(result);
     expect(result).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("Review complete.", { exact: false })).toHaveTextContent(
-      "Review complete. No regressions found."
-    );
+    const resultLines = [
+      ...(result.parentElement?.querySelectorAll("[data-slot=code-block-line]") ?? []),
+    ].map((line) => line.textContent);
+    expect(resultLines).toEqual(["Review complete.", "No regressions found."]);
     expect(screen.queryByText(/<task(?:_|\s|>)/)).not.toBeInTheDocument();
 
     view.rerender(
@@ -781,8 +785,9 @@ describe("task activity grouping", () => {
     await user.click(results[0]);
     await user.click(results[1]);
     expect(screen.getByText("Ordinary <task_result> text is unchanged")).toBeInTheDocument();
-    expect(results[0].parentElement?.querySelector("pre")?.textContent).toBe(
-      "  Ordinary <task_result> text is unchanged\n\n"
+    // The result is shown verbatim, leading whitespace and all.
+    expect(results[0].parentElement?.querySelector("pre")?.textContent).toMatch(
+      /^ {2}Ordinary <task_result> text is unchanged\n/
     );
     expect(screen.getByText("Agent could not finish.")).toBeInTheDocument();
     expect(screen.queryByText(/<task_error>/)).not.toBeInTheDocument();

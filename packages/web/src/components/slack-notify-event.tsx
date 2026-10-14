@@ -11,8 +11,17 @@ import type { SandboxEvent } from "@/types/session";
 import { formatSessionEventTime } from "@/lib/time";
 import { getSafeExternalUrl } from "@/lib/urls";
 import { APP_NAME } from "@/lib/site-config";
-import { ChevronRightIcon, ErrorIcon, LinkIcon, SlackIcon } from "@/components/ui/icons";
-import { TimelineRowContent } from "./timeline-row-content";
+import { ErrorIcon, LinkIcon, SlackIcon } from "@/components/ui/icons";
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceDescription,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "@/components/ui/trace";
 
 type ToolCallEvent = Extract<SandboxEvent, { type: "tool_call" }>;
 
@@ -108,43 +117,34 @@ export function SlackNotifyEvent({
   }
 
   return (
-    <div className="py-0.5">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full min-w-0 items-start gap-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ChevronRightIcon
-          className={`w-3.5 h-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ${
-            isExpanded ? "rotate-90" : ""
-          }`}
-        />
-        {denial ? (
-          <ErrorIcon className="w-3.5 h-3.5 shrink-0 text-destructive" />
-        ) : (
-          <SlackIcon className="w-3.5 h-3.5 shrink-0 text-secondary-foreground" />
-        )}
-        <TimelineRowContent time={showTime ? time : undefined}>
-          slack-notify {summaryLine}
-        </TimelineRowContent>
-      </button>
-
-      {isExpanded && (
-        <div className="rounded-lg mt-2 ml-0 overflow-hidden border border-border-muted bg-card p-3 text-xs wrap-anywhere sm:ml-5">
-          {success ? (
-            <SlackNotifySuccessBody success={success} />
-          ) : denial ? (
-            <SlackNotifyDenialBody
-              reason={denial}
-              channelInput={channelInput}
-              retryAfterSeconds={envelopeDenial?.retryAfterSeconds}
-            />
-          ) : (
-            <span className="text-secondary-foreground">No details available</span>
-          )}
-        </div>
-      )}
-    </div>
+    <Trace>
+      <TraceCollapsible open={isExpanded} onOpenChange={onToggle}>
+        <TraceCollapsibleTrigger className="w-full">
+          <TraceLine status={denial ? "error" : undefined} className="w-full">
+            <TraceIcon>{denial ? <ErrorIcon /> : <SlackIcon />}</TraceIcon>
+            <TraceTitle>slack-notify {summaryLine}</TraceTitle>
+            {showTime && (
+              <TraceDescription className="ml-auto pl-2 text-xs">{time}</TraceDescription>
+            )}
+          </TraceLine>
+        </TraceCollapsibleTrigger>
+        <TraceCollapsibleContent>
+          <div className="overflow-hidden rounded-lg border border-border-muted bg-card p-3 text-xs wrap-anywhere">
+            {success ? (
+              <SlackNotifySuccessBody success={success} />
+            ) : denial ? (
+              <SlackNotifyDenialBody
+                reason={denial}
+                channelInput={channelInput}
+                retryAfterSeconds={envelopeDenial?.retryAfterSeconds}
+              />
+            ) : (
+              <span className="text-secondary-foreground">No details available</span>
+            )}
+          </div>
+        </TraceCollapsibleContent>
+      </TraceCollapsible>
+    </Trace>
   );
 }
 

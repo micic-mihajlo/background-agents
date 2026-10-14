@@ -1,11 +1,22 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { FileTextIcon, ScrollTextIcon } from "lucide-react";
 import { formatSessionEventTime } from "@/lib/time";
 import { formatToolCall } from "@/lib/tool-formatters";
 import type { ToolCallEvent } from "@/lib/timeline-items";
-import { BoxIcon, ChevronRightIcon } from "@/components/ui/icons";
-import { TimelineRowContent } from "./timeline-row-content";
+import { Badge } from "@/components/ui/badge";
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceDescription,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "@/components/ui/trace";
+import { HighlightedCodeBlock, ToolIcon, toolTraceStatus } from "./tool-call-presentation";
 
 function stringArg(event: ToolCallEvent, key: string): string | null {
   const value = event.args?.[key];
@@ -22,41 +33,11 @@ function cleanTaskResult(output: string | undefined): string | null {
   return envelope ? envelope[2].trim() : output;
 }
 
-function TaskDisclosure({
-  label,
-  content,
-  isExpanded,
-  onToggle,
-}: {
-  label: string;
-  content: string;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="rounded-lg border border-border-muted bg-card shadow-card overflow-hidden">
-      <button
-        type="button"
-        aria-expanded={isExpanded}
-        onClick={onToggle}
-        className="w-full flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-left text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ChevronRightIcon
-          className={`w-3.5 h-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
-            isExpanded ? "rotate-90" : ""
-          }`}
-        />
-        {label}
-      </button>
-      {isExpanded && (
-        <pre className="max-h-64 whitespace-pre-wrap border-t border-border-muted px-3 py-2 text-xs text-foreground wrap-anywhere">
-          {content}
-        </pre>
-      )}
-    </div>
-  );
-}
-
+/**
+ * A subagent run, following the AI Elements Subagent pattern: one line that
+ * expands into the agent and task badges, the tool calls it made, and its
+ * instructions and result.
+ */
 export function TaskActivityItem({
   event,
   hasActivity,
@@ -79,71 +60,85 @@ export function TaskActivityItem({
   const agent = stringArg(event, "subagent_type");
   const taskId = stringArg(event, "task_id");
   const result = cleanTaskResult(event.output);
-  const isRunning = event.status === "running";
-  return (
-    <div className="py-0.5">
-      <button
-        type="button"
-        aria-expanded={isExpanded}
-        onClick={() => onToggleSection(sectionKey("task"))}
-        className="flex w-full min-w-0 items-start gap-1.5 text-left text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ChevronRightIcon
-          className={`mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground transition-transform duration-200 ease-in-out-strong ${
-            isExpanded ? "rotate-90" : ""
-          }`}
-        />
-        <BoxIcon className="mt-[3px] h-3.5 w-3.5 shrink-0 text-secondary-foreground" />
-        {isRunning && (
-          <span
-            aria-hidden="true"
-            className="mt-1.5 inline-block h-2 w-2 shrink-0 animate-pulse rounded-full bg-accent"
-          />
-        )}
-        <TimelineRowContent time={formatSessionEventTime(event.timestamp)}>
-          {formatted.toolName} {formatted.summary}
-        </TimelineRowContent>
-      </button>
-      {isRunning && (
-        <span role="status" className="sr-only">
-          Task in progress
-        </span>
-      )}
+  const status = toolTraceStatus(event.status);
+  const isRunning = status === "running";
 
-      {isExpanded && (
-        <div className="mt-2 ml-0 space-y-2 sm:ml-5">
+  return (
+    <Trace>
+      <TraceCollapsible open={isExpanded} onOpenChange={() => onToggleSection(sectionKey("task"))}>
+        <TraceCollapsibleTrigger className="w-full">
+          <TraceLine status={status} className="w-full">
+            <TraceIcon>
+              <ToolIcon name="box" status={status} />
+            </TraceIcon>
+            <TraceTitle>
+              {formatted.toolName} {formatted.summary}
+            </TraceTitle>
+            <TraceDescription className="ml-auto pl-2 text-xs">
+              {formatSessionEventTime(event.timestamp)}
+            </TraceDescription>
+          </TraceLine>
+        </TraceCollapsibleTrigger>
+        {isRunning && (
+          <span role="status" className="sr-only">
+            Task in progress
+          </span>
+        )}
+        <TraceCollapsibleContent className="flex flex-col gap-3">
           {(agent || taskId) && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-secondary-foreground">
-              {agent && <span>Agent: {agent}</span>}
-              {taskId && <span>Task ID: {taskId}</span>}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {agent && <Badge>Agent: {agent}</Badge>}
+              {taskId && <Badge className="font-mono">Task ID: {taskId}</Badge>}
             </div>
           )}
           {hasActivity && (
-            <div className="space-y-1 border-l border-border py-1 pl-2 sm:pl-3">
-              <div className="text-[11px] font-medium text-secondary-foreground mb-1">
-                Task activity
-              </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-secondary-foreground">Task activity</span>
               {children}
             </div>
           )}
-          {prompt && (
-            <TaskDisclosure
-              label="Instructions"
-              content={prompt}
-              isExpanded={expandedSections.has(sectionKey("instructions"))}
-              onToggle={() => onToggleSection(sectionKey("instructions"))}
-            />
+          {(prompt || result) && (
+            <Trace>
+              {prompt && (
+                <TraceCollapsible
+                  open={expandedSections.has(sectionKey("instructions"))}
+                  onOpenChange={() => onToggleSection(sectionKey("instructions"))}
+                >
+                  <TraceCollapsibleTrigger>
+                    <TraceLine>
+                      <TraceIcon>
+                        <ScrollTextIcon />
+                      </TraceIcon>
+                      <TraceTitle>Instructions</TraceTitle>
+                    </TraceLine>
+                  </TraceCollapsibleTrigger>
+                  <TraceCollapsibleContent>
+                    <HighlightedCodeBlock code={prompt} wrap />
+                  </TraceCollapsibleContent>
+                </TraceCollapsible>
+              )}
+              {result && (
+                <TraceCollapsible
+                  open={expandedSections.has(sectionKey("result"))}
+                  onOpenChange={() => onToggleSection(sectionKey("result"))}
+                >
+                  <TraceCollapsibleTrigger>
+                    <TraceLine>
+                      <TraceIcon>
+                        <FileTextIcon />
+                      </TraceIcon>
+                      <TraceTitle>Result</TraceTitle>
+                    </TraceLine>
+                  </TraceCollapsibleTrigger>
+                  <TraceCollapsibleContent>
+                    <HighlightedCodeBlock code={result} wrap className="max-h-96" />
+                  </TraceCollapsibleContent>
+                </TraceCollapsible>
+              )}
+            </Trace>
           )}
-          {result && (
-            <TaskDisclosure
-              label="Result"
-              content={result}
-              isExpanded={expandedSections.has(sectionKey("result"))}
-              onToggle={() => onToggleSection(sectionKey("result"))}
-            />
-          )}
-        </div>
-      )}
-    </div>
+        </TraceCollapsibleContent>
+      </TraceCollapsible>
+    </Trace>
   );
 }

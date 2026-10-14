@@ -7,6 +7,8 @@ import type {
 } from "@open-inspect/shared/types/session-diffs";
 import { buildUniquePathLabels, type DiffSelection } from "@/lib/session-diffs";
 import { cn } from "@/lib/utils";
+import { ChevronRightIcon, FileIcon, FolderIcon } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface FilesChangedSectionProps {
   repositories: SessionDiffRepository[];
@@ -45,8 +47,101 @@ function fileName(path: string): string {
   return path.slice(path.lastIndexOf("/") + 1);
 }
 
-function directoryName(path: string): string {
-  return path.slice(0, path.lastIndexOf("/"));
+type FileTreeNode =
+  | { type: "file"; path: string; file: SessionDiffFile }
+  | { type: "folder"; name: string; path: string; children: FileTreeNode[] };
+
+/** Groups files into folders, compressing single-folder chains like `packages/web`. */
+function buildFileTree(files: SessionDiffFile[]): FileTreeNode[] {
+  type Folder = { folders: Map<string, Folder>; files: SessionDiffFile[] };
+  const root: Folder = { folders: new Map(), files: [] };
+  for (const file of files) {
+    const segments = file.path.split("/").slice(0, -1);
+    let folder = root;
+    for (const segment of segments) {
+      let next = folder.folders.get(segment);
+      if (!next) {
+        next = { folders: new Map(), files: [] };
+        folder.folders.set(segment, next);
+      }
+      folder = next;
+    }
+    folder.files.push(file);
+  }
+
+  const toNodes = (folder: Folder, prefix: string): FileTreeNode[] => [
+    ...[...folder.folders.entries()].map(([name, child]): FileTreeNode => {
+      let label = name;
+      let current = child;
+      while (current.files.length === 0 && current.folders.size === 1) {
+        const [nextName, next] = [...current.folders.entries()][0];
+        label = `${label}/${nextName}`;
+        current = next;
+      }
+      const path = prefix ? `${prefix}/${label}` : label;
+      return { type: "folder", name: label, path, children: toNodes(current, path) };
+    }),
+    ...folder.files.map((file): FileTreeNode => ({ type: "file", path: file.path, file })),
+  ];
+  return toNodes(root, "");
+}
+
+/** The changed files as folders you can open, following the AI Elements File Tree pattern. */
+function ChangedFileTree({
+  files,
+  forceOpen,
+  renderFile,
+}: {
+  files: SessionDiffFile[];
+  forceOpen: boolean;
+  renderFile: (file: SessionDiffFile, depth: number) => React.ReactNode;
+}) {
+  const tree = useMemo(() => buildFileTree(files), [files]);
+  const renderNode = (node: FileTreeNode, depth: number): React.ReactNode =>
+    node.type === "file" ? (
+      renderFile(node.file, depth)
+    ) : (
+      <FolderNode key={node.path} name={node.name} depth={depth} forceOpen={forceOpen}>
+        {node.children.map((child) => renderNode(child, depth + 1))}
+      </FolderNode>
+    );
+  return <div className="flex flex-col gap-px">{tree.map((node) => renderNode(node, 0))}</div>;
+}
+
+function FolderNode({
+  name,
+  depth,
+  forceOpen,
+  children,
+}: {
+  name: string;
+  depth: number;
+  forceOpen: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <Collapsible
+      open={forceOpen || open}
+      onOpenChange={(next) => {
+        if (!forceOpen) setOpen(next);
+      }}
+      className="group/folder flex flex-col gap-px"
+    >
+      <CollapsibleTrigger
+        className="flex h-7 w-full min-w-0 items-center gap-1.5 rounded-md pr-2 text-left text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+        style={{ paddingLeft: `${0.25 + depth * 0.75}rem` }}
+      >
+        <ChevronRightIcon
+          className="size-3.5 shrink-0 transition-transform duration-200 ease-in-out-strong group-data-[state=open]/folder:rotate-90"
+          aria-hidden="true"
+        />
+        <FolderIcon className="size-3.5 shrink-0" aria-hidden="true" />
+        <span className="min-w-0 truncate">{name}</span>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="flex flex-col gap-px">{children}</CollapsibleContent>
+    </Collapsible>
+  );
 }
 
 function RepositoryGroup({
@@ -134,8 +229,10 @@ export function FilesChangedSection({
           if (files.length === 0) return null;
           const contents = (
             <>
-              <div className="space-y-1">
-                {files.map((file) => {
+              <ChangedFileTree
+                files={files}
+                forceOpen={Boolean(normalizedQuery)}
+                renderFile={(file, depth) => {
                   const summary = fileSummary(file);
                   const active =
                     selected?.repositoryPosition === repository.position &&
@@ -144,6 +241,7 @@ export function FilesChangedSection({
                     <button
                       type="button"
                       key={file.id}
+                      style={{ paddingLeft: `${0.5 + depth * 0.75}rem` }}
                       title={file.oldPath ? `${file.oldPath} → ${file.path}` : file.path}
                       aria-label={`${labels[file.path]} ${STATUS_NAMES[file.status]} ${summary}`}
                       aria-current={active ? "true" : undefined}
@@ -151,10 +249,10 @@ export function FilesChangedSection({
                       data-diff-path={file.path}
                       onClick={() => onSelect(repository, file)}
                       className={cn(
-                        "flex w-full items-center gap-2 rounded-sm border-l-2 px-2 py-2 text-left text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
+                        "flex h-7 w-full items-center gap-1.5 rounded-md pr-2 text-left text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                         active
-                          ? "border-accent bg-accent-muted text-foreground"
-                          : "border-transparent text-foreground hover:bg-muted"
+                          ? "bg-accent-muted text-foreground"
+                          : "text-foreground hover:bg-muted"
                       )}
                     >
                       <span
@@ -163,14 +261,11 @@ export function FilesChangedSection({
                       >
                         {STATUS_LABELS[file.status]}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate">{fileName(file.path)}</span>
-                        {file.path.includes("/") && (
-                          <span className="mt-1 block truncate text-[10px] text-muted-foreground">
-                            {directoryName(file.path)}
-                          </span>
-                        )}
-                      </span>
+                      <FileIcon
+                        className="size-3.5 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1 truncate">{fileName(file.path)}</span>
                       {file.renderState === "renderable" ? (
                         <span className="flex shrink-0 gap-1 font-mono text-[10px]">
                           <span className="text-success">+{file.additions ?? 0}</span>
@@ -183,8 +278,8 @@ export function FilesChangedSection({
                       )}
                     </button>
                   );
-                })}
-              </div>
+                }}
+              />
               {repository.truncated && (
                 <p className="mt-2 text-[11px] text-warning">
                   {repository.omittedFileCount} additional files omitted

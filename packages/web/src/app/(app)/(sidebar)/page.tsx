@@ -10,6 +10,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { CollapsedSidebarControls, useSidebarContext } from "@/components/sidebar-layout";
 import { ErrorBanner } from "@/components/ui/error-banner";
+import { Button } from "@/components/ui/button";
 import { SessionAccessSelector } from "@/components/session-access-selector";
 import { matchesShortcut } from "@/lib/keyboard-shortcuts";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
@@ -109,6 +110,15 @@ function skillPreviewTarget(
     ? { repoOwner: fields.repoOwner, repoName: fields.repoName }
     : {};
 }
+
+/** One-click starters, following the AI Elements Suggestion pattern. They fill the prompt. */
+const PROMPT_SUGGESTIONS = [
+  "Fix the failing tests",
+  "Find and fix a bug in recent commits",
+  "Add tests for untested code",
+  "Update outdated dependencies",
+  "Explain how this codebase is structured",
+];
 
 export default function Home() {
   const { data: session } = useAuthSession();
@@ -790,6 +800,30 @@ function HomeContent({
                   </div>
                 </div>
               </div>
+
+              {!prompt && (
+                <div
+                  aria-label="Suggested prompts"
+                  className="mt-3 flex scroll-fade-x no-scrollbar gap-2 overflow-x-auto overscroll-x-contain"
+                >
+                  {PROMPT_SUGGESTIONS.map((suggestion) => (
+                    <Button
+                      key={suggestion}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 rounded-full font-normal text-muted-foreground"
+                      disabled={creating}
+                      onClick={() => {
+                        handlePromptChange(suggestion);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              )}
 
               <SessionAccessSelector
                 teamId={teamId}

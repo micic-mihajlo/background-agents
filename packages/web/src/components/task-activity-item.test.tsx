@@ -8,7 +8,7 @@ import { TaskActivityItem } from "./task-activity-item";
 afterEach(cleanup);
 
 describe("TaskActivityItem", () => {
-  it("aligns the task icons and running indicator with the text", () => {
+  it("marks a running subagent with a spinner and running status", () => {
     const event: ToolCallEvent = {
       type: "tool_call",
       sandboxId: "sandbox-1",
@@ -36,11 +36,11 @@ describe("TaskActivityItem", () => {
     );
 
     const button = screen.getByRole("button", { name: /Task Explore timeline rendering/ });
-    const icons = button.querySelectorAll("svg");
-    const indicator = button.querySelector('[aria-hidden="true"]');
+    const line = button.querySelector("[data-slot=trace-line]");
 
-    expect(icons).toHaveLength(2);
-    expect([...icons].every((icon) => icon.classList.contains("mt-[3px]"))).toBe(true);
-    expect(indicator).toHaveClass("mt-1.5");
+    // A running subagent shows a spinner and the shimmering running status.
+    expect(line).toHaveAttribute("data-status", "running");
+    expect(button.querySelector(".animate-spin")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Task in progress");
   });
 });
