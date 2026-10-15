@@ -45,6 +45,11 @@ export function buildJiraMcpServer(credentials: JiraCredentials): McpServerConfi
  * primary-member gates in resolveSessionScopedSettings), this is the UNION
  * across members: injecting a tool server is additive. Repo-less sessions
  * get Jira only when it is enabled globally for all repositories.
+ *
+ * The global `enabledRepos` allowlist is the outer gate: a repository
+ * override cannot enable Jira outside it. The Atlassian credential is
+ * workspace-wide and managed with `integrations.manage`, so overrides (which
+ * need only `repositories.settings.manage`) must not extend its reach.
  */
 export async function resolveJiraEnabled(
   db: SqlDatabase,

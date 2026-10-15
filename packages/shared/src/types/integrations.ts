@@ -171,7 +171,13 @@ export const ATLASSIAN_ROVO_MCP_URL = "https://mcp.atlassian.com/v2/mcp";
 export const JIRA_MCP_SERVER_NAME = "atlassian";
 
 const MAX_JIRA_API_TOKEN_LENGTH = 4096;
-const jiraApiTokenSchema = z.string().trim().min(1).max(MAX_JIRA_API_TOKEN_LENGTH);
+/** Tokens are sent verbatim in an HTTP header, so allow only printable ASCII without spaces. */
+const jiraApiTokenSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(MAX_JIRA_API_TOKEN_LENGTH)
+  .regex(/^[\x21-\x7e]+$/, "must not contain whitespace, control, or non-ASCII characters");
 
 /**
  * `basic`: a user's scoped API token, sent as `Basic base64(email:token)`.

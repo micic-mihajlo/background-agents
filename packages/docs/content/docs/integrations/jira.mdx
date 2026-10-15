@@ -30,7 +30,7 @@ Jira does not start sessions. Start a session the usual way and mention the issu
    - **Personal API token**: create one at id.atlassian.com with **Create API token with scopes**, and enter it with your Atlassian email. Agents act as you. Classic tokens without scopes connect but expose no Jira tools.
    - **Service account API key**: agents act as an Atlassian service account, so their comments and transitions are attributed to a bot instead of a person.
 3. Save the credentials. They are encrypted at rest and are never shown again; to rotate, enter a new value.
-4. Under **Defaults & Scope**, turn on **Enable Jira** and choose all repositories or an allowlist. Use **Repository Overrides** to turn Jira on or off for specific repositories.
+4. Under **Defaults & Scope**, turn on **Enable Jira** and choose all repositories or an allowlist. Use **Repository Overrides** to turn Jira on or off for specific repositories. An override cannot enable Jira for a repository outside the allowlist, because the Atlassian credential is shared by the whole workspace.
 
 New sandboxes pick up changes on their next start. Agents act with the token owner's Jira permissions, so scope the token to the projects agents should touch.
 

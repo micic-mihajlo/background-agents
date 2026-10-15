@@ -83,6 +83,12 @@ describe("Jira integration", () => {
       ["basic without email", { credentials: { authType: "basic", apiToken: "t" } }],
       ["invalid email", { credentials: { authType: "basic", email: "nope", apiToken: "t" } }],
       ["blank token", { credentials: { authType: "bearer", apiToken: "   " } }],
+      ["token with a newline", { credentials: { authType: "bearer", apiToken: "a\r\nX-Evil: 1" } }],
+      ["token with a space", { credentials: { authType: "bearer", apiToken: "a b" } }],
+      [
+        "token with non-ASCII characters",
+        { credentials: { authType: "basic", email: "a@b.co", apiToken: "tök" } },
+      ],
       ["unknown auth type", { credentials: { authType: "oauth", apiToken: "t" } }],
       ["unknown field", { credentials: { authType: "bearer", apiToken: "t", extra: 1 } }],
     ])("rejects %s", async (_name, body) => {
@@ -131,6 +137,15 @@ describe("Jira integration", () => {
       expect(await resolveJiraEnabled(env.DB, [acmeWeb])).toBe(true);
       expect(await resolveJiraEnabled(env.DB, [acmeApi])).toBe(false);
       expect(await resolveJiraEnabled(env.DB, [])).toBe(false);
+    });
+
+    it("does not let a repository override enable Jira outside the allowlist", async () => {
+      await settings().setGlobal("jira", {
+        defaults: { enabled: true },
+        enabledRepos: ["acme/web"],
+      });
+      await settings().setRepoSettings("jira", "acme/api", { enabled: true });
+      expect(await resolveJiraEnabled(env.DB, [acmeApi])).toBe(false);
     });
 
     it("applies when any member enables it", async () => {
