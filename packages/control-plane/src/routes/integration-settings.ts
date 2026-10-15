@@ -11,6 +11,7 @@ import {
   type EnvironmentSettingsIntegrationId,
   type GitHubBotSettings,
   type IntegrationId,
+  type JiraSettings,
   type SandboxSettings,
   type VncSettings,
 } from "@open-inspect/shared/types/integrations";
@@ -24,6 +25,12 @@ import {
 } from "../db/integration-settings";
 import { Hono } from "hono";
 import { EnvironmentStore } from "../db/environments";
+import {
+  JiraCredentialStore,
+  JiraCredentialsValidationError,
+  parseJiraCredentials,
+} from "../db/jira-credentials";
+import { requireRepoSecretsEncryptionKey } from "../env-validation";
 import type { Env } from "../types";
 import type { SqlDatabase } from "../db/sql-database";
 import { createLogger } from "../logger";
@@ -474,6 +481,18 @@ async function handleGetResolvedConfig(
     });
   }
 
+  if (id === "jira") {
+    const jiraSettings = settings as JiraSettings;
+    return json({
+      integrationId: id,
+      repo,
+      config: {
+        enabled: jiraSettings.enabled ?? false,
+        enabledRepos,
+      },
+    });
+  }
+
   if (id === "sandbox") {
     const sandboxSettings = settings as SandboxSettings;
     return json({
@@ -499,6 +518,102 @@ async function handleGetResolvedConfig(
   }
 
   return error(`Unsupported integration: ${id}`, 400);
+}
+
+/** Only integrations with a credential store accept the credentials routes. */
+function jiraCredentialStore(
+  env: Env,
+  params: { id: string },
+  ctx: RequestContext
+): JiraCredentialStore | Response {
+  const id = integrationId(params.id);
+  if (!id) return error(`Unknown integration: ${params.id}`, 404);
+  if (id !== "jira") return error(`Integration ${id} does not store credentials`, 400);
+  return new JiraCredentialStore(ctx.db, requireRepoSecretsEncryptionKey(env));
+}
+
+async function handleGetCredentialsStatus(
+  _request: Request,
+  env: Env,
+  params: { id: string },
+  ctx: RequestContext
+): Promise<Response> {
+  const store = jiraCredentialStore(env, params, ctx);
+  if (store instanceof Response) return store;
+  return json({ integrationId: params.id, credentials: await store.getStatus() });
+}
+
+async function handleSetCredentials(
+  request: Request,
+  env: Env,
+  params: { id: string },
+  ctx: RequestContext
+): Promise<Response> {
+  const store = jiraCredentialStore(env, params, ctx);
+  if (store instanceof Response) return store;
+
+  const body = await parseJsonBody(request);
+  if (body instanceof Response) return body;
+  if (!isRecord(body) || !isRecord(body.credentials)) {
+    return error("Request body must include credentials object", 400);
+  }
+
+  try {
+    await store.set(parseJiraCredentials(body.credentials));
+
+    logger.info("integration_credentials.updated", {
+      event: "integration_credentials.updated",
+      integration_id: params.id,
+      request_id: ctx.request_id,
+      trace_id: ctx.trace_id,
+    });
+
+    return json({
+      status: "updated",
+      integrationId: params.id,
+      credentials: await store.getStatus(),
+    });
+  } catch (e) {
+    if (e instanceof JiraCredentialsValidationError) {
+      return error(e.message, 400);
+    }
+    logger.error("Failed to update integration credentials", {
+      error: e instanceof Error ? e.message : String(e),
+      request_id: ctx.request_id,
+      trace_id: ctx.trace_id,
+    });
+    return error("Integration credentials storage unavailable", 503);
+  }
+}
+
+async function handleDeleteCredentials(
+  _request: Request,
+  env: Env,
+  params: { id: string },
+  ctx: RequestContext
+): Promise<Response> {
+  const store = jiraCredentialStore(env, params, ctx);
+  if (store instanceof Response) return store;
+
+  try {
+    await store.delete();
+
+    logger.info("integration_credentials.deleted", {
+      event: "integration_credentials.deleted",
+      integration_id: params.id,
+      request_id: ctx.request_id,
+      trace_id: ctx.trace_id,
+    });
+
+    return json({ status: "deleted", integrationId: params.id });
+  } catch (e) {
+    logger.error("Failed to delete integration credentials", {
+      error: e instanceof Error ? e.message : String(e),
+      request_id: ctx.request_id,
+      trace_id: ctx.trace_id,
+    });
+    return error("Integration credentials storage unavailable", 503);
+  }
 }
 
 const INTEGRATIONS_READ = admit({
@@ -542,6 +657,18 @@ integrationSettingsRoutes.put("/integration-settings/:id", INTEGRATIONS_MANAGE, 
 );
 integrationSettingsRoutes.delete("/integration-settings/:id", INTEGRATIONS_MANAGE, (c) =>
   dispatch(c, handleDeleteIntegrationSettings)
+);
+// Integration credentials — write-only secrets; GET returns status only
+integrationSettingsRoutes.get("/integration-settings/:id/credentials", INTEGRATIONS_READ, (c) =>
+  dispatch(c, handleGetCredentialsStatus)
+);
+integrationSettingsRoutes.put("/integration-settings/:id/credentials", INTEGRATIONS_MANAGE, (c) =>
+  dispatch(c, handleSetCredentials)
+);
+integrationSettingsRoutes.delete(
+  "/integration-settings/:id/credentials",
+  INTEGRATIONS_MANAGE,
+  (c) => dispatch(c, handleDeleteCredentials)
 );
 // Integration settings — per-repo
 integrationSettingsRoutes.get("/integration-settings/:id/repos", INTEGRATIONS_READ, (c) =>

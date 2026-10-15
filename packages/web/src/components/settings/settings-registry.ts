@@ -252,7 +252,7 @@ export const SETTINGS_GROUPS = [
         id: "integrations",
         label: "Integrations",
         description: "Connect external tools and services",
-        keywords: "github slack linear vnc code server",
+        keywords: "github slack linear jira atlassian vnc code server",
         icon: IntegrationsIcon,
         visibility: anyOf("integrations.read"),
         panel: lazyPanel(() =>

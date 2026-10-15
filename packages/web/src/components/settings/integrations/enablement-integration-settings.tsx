@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import useSWR, { mutate } from "swr";
 import { toast } from "sonner";
 import {
@@ -40,7 +40,7 @@ interface EnablementSettings {
 type EnablementGlobalConfig = IntegrationEntry<EnablementSettings>["global"];
 
 interface EnablementIntegrationCopy {
-  id: Extract<IntegrationId, "code-server" | "vnc">;
+  id: Extract<IntegrationId, "code-server" | "vnc" | "jira">;
   title: string;
   intro: string;
   overrideDescription: string;
@@ -74,7 +74,14 @@ interface ReposResponse {
 /**
  * Renders global and repository enablement settings with each scope editable only by authorized users.
  */
-export function EnablementIntegrationSettings({ copy }: { copy: EnablementIntegrationCopy }) {
+export function EnablementIntegrationSettings({
+  copy,
+  children,
+}: {
+  copy: EnablementIntegrationCopy;
+  /** Integration-specific sections rendered above the enablement settings. */
+  children?: ReactNode;
+}) {
   const { hasPermission } = useCurrentUserAuthorization();
   const canManageGlobal = hasPermission("integrations.manage");
   const canManageRepos = hasPermission("repositories.settings.manage");
@@ -97,6 +104,8 @@ export function EnablementIntegrationSettings({ copy }: { copy: EnablementIntegr
     <div>
       <h2 className="text-lg font-semibold text-foreground mb-1">{copy.title}</h2>
       <p className="text-sm text-muted-foreground mb-6">{copy.intro}</p>
+
+      {children}
 
       <fieldset disabled={!canManageGlobal} className="min-w-0">
         <GlobalSettingsSection
