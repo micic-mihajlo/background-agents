@@ -7,6 +7,7 @@ import {
 } from "@open-inspect/shared/types/integrations";
 import { CodeServerIntegrationSettings } from "./code-server-integration-settings";
 import { GitHubIntegrationSettings } from "./github-integration-settings";
+import { JiraIntegrationSettings } from "./jira-integration-settings";
 import { LinearIntegrationSettings } from "./linear-integration-settings";
 import { SlackIntegrationSettings } from "./slack-integration-settings";
 import { VncIntegrationSettings } from "./vnc-integration-settings";
@@ -17,6 +18,7 @@ export const integrationSettingsComponents: Partial<Record<IntegrationId, Compon
   "code-server": CodeServerIntegrationSettings,
   vnc: VncIntegrationSettings,
   slack: SlackIntegrationSettings,
+  jira: JiraIntegrationSettings,
 };
 
 export const visibleIntegrationDefinitions = INTEGRATION_DEFINITIONS.filter(

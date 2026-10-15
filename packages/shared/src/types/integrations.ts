@@ -5,7 +5,8 @@ import { escapeRegExp } from "../regex";
 import { z } from "zod";
 import { teamSettingsSchema } from "./teams";
 
-export type IntegrationId = "github" | "linear" | "code-server" | "vnc" | "sandbox" | "slack";
+export type IntegrationId =
+  "github" | "linear" | "code-server" | "vnc" | "sandbox" | "slack" | "jira";
 
 /** Enforces the common shape for all integration configurations. */
 export interface IntegrationEntry<
@@ -152,6 +153,62 @@ export const vncSettingsSchema = z.strictObject({
 });
 
 export type VncSettings = z.infer<typeof vncSettingsSchema>;
+
+/** Overridable behavior settings for the Jira integration. */
+export const jiraSettingsSchema = z.strictObject({
+  enabled: z.boolean().optional(),
+});
+
+export type JiraSettings = z.infer<typeof jiraSettingsSchema>;
+
+/**
+ * Atlassian's hosted Rovo MCP server. Covers Jira Cloud (and Confluence) and
+ * accepts headless API-token auth once an org admin enables it.
+ */
+export const ATLASSIAN_ROVO_MCP_URL = "https://mcp.atlassian.com/v2/mcp";
+
+/** Name of the MCP server injected for Jira; agent tools appear as `mcp__atlassian__*`. */
+export const JIRA_MCP_SERVER_NAME = "atlassian";
+
+const MAX_JIRA_API_TOKEN_LENGTH = 4096;
+/** Tokens are sent verbatim in an HTTP header, so allow only printable ASCII without spaces. */
+const jiraApiTokenSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(MAX_JIRA_API_TOKEN_LENGTH)
+  .regex(/^[\x21-\x7e]+$/, "must not contain whitespace, control, or non-ASCII characters");
+
+/**
+ * `basic`: a user's scoped API token, sent as `Basic base64(email:token)`.
+ * `bearer`: a service-account API key, sent as `Bearer <key>`.
+ */
+export const jiraAuthTypeSchema = z.enum(["basic", "bearer"]);
+
+export type JiraAuthType = z.infer<typeof jiraAuthTypeSchema>;
+
+export const jiraCredentialsSchema = z.discriminatedUnion("authType", [
+  z.strictObject({
+    authType: z.literal("basic"),
+    email: z.email(),
+    apiToken: jiraApiTokenSchema,
+  }),
+  z.strictObject({
+    authType: z.literal("bearer"),
+    apiToken: jiraApiTokenSchema,
+  }),
+]);
+
+/** Decrypted Jira credentials. Internal use only; never returned by the API. */
+export type JiraCredentials = z.infer<typeof jiraCredentialsSchema>;
+
+/** Jira credential state for API responses — never includes the token. */
+export interface JiraCredentialsStatus {
+  configured: boolean;
+  authType: JiraAuthType | null;
+  email: string | null;
+  updatedAt: number | null;
+}
 
 /** Maximum number of tunnel ports a user can configure per sandbox. */
 export const MAX_TUNNEL_PORTS = 10;
@@ -636,6 +693,10 @@ export const integrationSettingsSchemas = {
     global: integrationGlobalSettingsSchema(slackGlobalSettingsSchema),
     repo: slackRepoSettingsSchema,
   },
+  jira: {
+    global: integrationGlobalSettingsSchema(jiraSettingsSchema),
+    repo: jiraSettingsSchema,
+  },
   scm: {
     global: scmGlobalConfigSchema,
     repo: scmSettingsSchema,
@@ -690,6 +751,7 @@ export type CodeServerGlobalConfig = IntegrationSettingsMap["code-server"]["glob
 export type VncGlobalConfig = IntegrationSettingsMap["vnc"]["global"];
 export type SandboxGlobalConfig = IntegrationSettingsMap["sandbox"]["global"];
 export type SlackGlobalConfig = IntegrationSettingsMap["slack"]["global"];
+export type JiraGlobalConfig = IntegrationSettingsMap["jira"]["global"];
 
 /** Full MCP server config with decrypted credentials. Internal use only. */
 export interface McpServerConfig {
@@ -808,5 +870,10 @@ export const INTEGRATION_DEFINITIONS: {
     id: "slack",
     name: "Slack",
     description: "Agent-driven Slack notifications and mention policy",
+  },
+  {
+    id: "jira",
+    name: "Jira",
+    description: "Let agents read and update Jira Cloud issues through Atlassian's Rovo MCP server",
   },
 ];

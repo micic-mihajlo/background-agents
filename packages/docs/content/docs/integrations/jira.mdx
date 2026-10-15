@@ -1,0 +1,49 @@
+---
+title: Jira
+description: Give OpenInspect agents access to Jira Cloud through Atlassian's Rovo MCP server so they can read issues, comment, and move work along while they code.
+audience: user
+owner: integrations
+status: published
+lastReviewed: "2026-10-15"
+relatedCode:
+  - packages/shared/src/types/integrations.ts
+  - packages/control-plane/src/session/jira-mcp.ts
+  - packages/control-plane/src/db/jira-credentials.ts
+  - packages/control-plane/src/routes/integration-settings.ts
+  - packages/web/src/components/settings/integrations/jira-integration-settings.tsx
+  - terraform/d1/migrations/0086_integration_credentials.sql
+---
+
+The Jira integration connects sessions to Jira Cloud. When it is on, agents can look up the issue you mention, search with JQL, read and edit issues, comment, and transition issues between statuses. Under the hood, OpenInspect adds Atlassian's hosted Rovo MCP server to each session, so the agent sees its tools as `mcp__atlassian__*`.
+
+Jira does not start sessions. Start a session the usual way and mention the issue, for example "Fix STAN-123, then comment with the PR link and move it to In Review."
+
+## Before you start
+
+- **Jira Cloud only.** The Rovo MCP server works with `*.atlassian.net` sites. For Jira Data Center, add a self-hosted MCP server under [Settings › MCP Servers](/configure/mcp-servers) instead.
+- **An Atlassian organization admin must allow API-token authentication** for the Rovo MCP server, under Atlassian Administration › Rovo › Rovo MCP server › Authentication. Without it, sessions connect but cannot authenticate.
+
+## Connect Jira
+
+1. Open **Settings › Integrations › Jira**. You need the `integrations.manage` permission.
+2. Under **Atlassian Credentials**, choose how agents authenticate:
+   - **Personal API token**: create one at id.atlassian.com with **Create API token with scopes**, and enter it with your Atlassian email. Agents act as you. Classic tokens without scopes connect but expose no Jira tools.
+   - **Service account API key**: agents act as an Atlassian service account, so their comments and transitions are attributed to a bot instead of a person.
+3. Save the credentials. They are encrypted at rest and are never shown again; to rotate, enter a new value.
+4. Under **Defaults & Scope**, turn on **Enable Jira** and choose all repositories or an allowlist. Use **Repository Overrides** to turn Jira on or off for specific repositories. An override cannot enable Jira for a repository outside the allowlist, because the Atlassian credential is shared by the whole workspace.
+
+New sandboxes pick up changes on their next start. Agents act with the token owner's Jira permissions, so scope the token to the projects agents should touch.
+
+## Which sessions get Jira
+
+| Session                             | Jira is available when                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| Single repository                   | Jira is enabled for that repository (global default or override)         |
+| Multiple repositories               | Jira is enabled for **any** of the session's repositories                |
+| No repository                       | Jira is enabled globally with the **All repositories** scope             |
+| An MCP server named `atlassian` too | Your MCP server is used instead, and the integration's server is skipped |
+
+## Tips
+
+- To make agents follow your team's workflow every time, add it to the repository's `AGENTS.md` or `CLAUDE.md`, for example "When working from a Jira issue, link the PR in a comment and move the issue to In Review when done."
+- Text in Jira issues reaches the agent like any other prompt input. Do not put secrets in issues or comments.

@@ -53,6 +53,8 @@ import type { McpServerLookup, SlackAgentNotifyLookup } from "../sandbox/lifecyc
 import { SandboxAccess } from "../sandbox/lifecycle/sandbox-access";
 import { resolveBootBudgetTimeoutMs } from "../sandbox/lifecycle/decisions";
 import { McpServerStore } from "../db/mcp-servers";
+import { JiraCredentialStore } from "../db/jira-credentials";
+import { resolveJiraMcpServer, withJiraMcpServer } from "./jira-mcp";
 import { UserStore } from "../db/user-store";
 import { IntegrationSettingsStore, resolveSlackSettings } from "../db/integration-settings";
 import { SessionIndexStore } from "../db/session-index";
@@ -1121,8 +1123,15 @@ function createLifecycleManager(deps: LifecycleManagerDeps): SandboxLifecycleMan
     `https://open-inspect-control-plane.${env.CF_ACCOUNT_ID || "workers"}.workers.dev`;
 
   const mcpStore = new McpServerStore(db, repoSecretsEncryptionKey);
+  const jiraCredentialStore = new JiraCredentialStore(db, repoSecretsEncryptionKey);
   const mcpServerLookup: McpServerLookup = {
-    getDecryptedForSession: (repositories) => mcpStore.getDecryptedForSession(repositories),
+    getDecryptedForSession: async (repositories) => {
+      const [servers, jiraServer] = await Promise.all([
+        mcpStore.getDecryptedForSession(repositories),
+        resolveJiraMcpServer(db, jiraCredentialStore, repositories),
+      ]);
+      return withJiraMcpServer(servers, jiraServer);
+    },
   };
 
   // Session-scoped gate: resolved from the primary member (the scalar mirror

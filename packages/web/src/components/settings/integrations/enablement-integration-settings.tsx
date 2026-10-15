@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import useSWR, { mutate } from "swr";
 import { toast } from "sonner";
 import {
@@ -40,7 +40,7 @@ interface EnablementSettings {
 type EnablementGlobalConfig = IntegrationEntry<EnablementSettings>["global"];
 
 interface EnablementIntegrationCopy {
-  id: Extract<IntegrationId, "code-server" | "vnc">;
+  id: Extract<IntegrationId, "code-server" | "vnc" | "jira">;
   title: string;
   intro: string;
   overrideDescription: string;
@@ -74,7 +74,14 @@ interface ReposResponse {
 /**
  * Renders global and repository enablement settings with each scope editable only by authorized users.
  */
-export function EnablementIntegrationSettings({ copy }: { copy: EnablementIntegrationCopy }) {
+export function EnablementIntegrationSettings({
+  copy,
+  children,
+}: {
+  copy: EnablementIntegrationCopy;
+  /** Integration-specific sections rendered above the enablement settings. */
+  children?: ReactNode;
+}) {
   const { hasPermission } = useCurrentUserAuthorization();
   const canManageGlobal = hasPermission("integrations.manage");
   const canManageRepos = hasPermission("repositories.settings.manage");
@@ -98,6 +105,8 @@ export function EnablementIntegrationSettings({ copy }: { copy: EnablementIntegr
       <h2 className="text-lg font-semibold text-foreground mb-1">{copy.title}</h2>
       <p className="text-sm text-muted-foreground mb-6">{copy.intro}</p>
 
+      {children}
+
       <fieldset disabled={!canManageGlobal} className="min-w-0">
         <GlobalSettingsSection
           settings={settings}
@@ -111,6 +120,7 @@ export function EnablementIntegrationSettings({ copy }: { copy: EnablementIntegr
         <fieldset disabled={!canManageRepos} className="min-w-0">
           <RepoOverridesSection
             overrides={repoOverrides}
+            enabledRepos={settings?.enabledRepos ?? null}
             availableRepos={availableRepos}
             settingsKey={repoSettingsKey}
             copy={copy}
@@ -330,11 +340,14 @@ function GlobalSettingsSection({
 
 function RepoOverridesSection({
   overrides,
+  enabledRepos,
   availableRepos,
   settingsKey,
   copy,
 }: {
   overrides: RepoSettingsEntry[];
+  /** The saved global allowlist; null means all repositories. */
+  enabledRepos: string[] | null;
   availableRepos: EnrichedRepository[];
   settingsKey: `/api/integration-settings/${string}/repos`;
   copy: EnablementIntegrationCopy;
@@ -379,7 +392,12 @@ function RepoOverridesSection({
       {overrides.length > 0 ? (
         <div className="space-y-2 mb-4">
           {overrides.map((entry) => (
-            <RepoOverrideRow key={entry.repo} entry={entry} settingsKey={settingsKey} />
+            <RepoOverrideRow
+              key={entry.repo}
+              entry={entry}
+              outsideAllowlist={enabledRepos !== null && !enabledRepos.includes(entry.repo)}
+              settingsKey={settingsKey}
+            />
           ))}
         </div>
       ) : (
@@ -409,9 +427,12 @@ function RepoOverridesSection({
 
 function RepoOverrideRow({
   entry,
+  outsideAllowlist,
   settingsKey,
 }: {
   entry: RepoSettingsEntry;
+  /** The global allowlist gates overrides, so this override has no effect. */
+  outsideAllowlist: boolean;
   settingsKey: `/api/integration-settings/${string}/repos`;
 }) {
   const [enabled, setEnabled] = useState(entry.settings.enabled ?? false);
@@ -479,20 +500,28 @@ function RepoOverrideRow({
       aria-label={`${entry.repo} override`}
       className="flex items-center justify-between gap-2 px-4 py-3 border border-border rounded-sm"
     >
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <span className="text-sm font-medium text-foreground truncate">{entry.repo}</span>
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={() => {
-              setEnabled(!enabled);
-              setDirty(true);
-            }}
-            className="rounded border-border"
-          />
-          <span className="text-muted-foreground">Enabled</span>
-        </label>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-foreground truncate">{entry.repo}</span>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={() => {
+                setEnabled(!enabled);
+                setDirty(true);
+              }}
+              className="rounded border-border"
+            />
+            <span className="text-muted-foreground">Enabled</span>
+          </label>
+        </div>
+        {outsideAllowlist && (
+          <p className="text-xs text-warning mt-1">
+            Not in the repository allowlist, so this override has no effect. Add the repository
+            under Repository Scope to use it.
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

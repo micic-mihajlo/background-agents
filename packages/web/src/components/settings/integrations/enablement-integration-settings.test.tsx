@@ -222,6 +222,35 @@ describe("code-server enablement integration settings", () => {
     );
   });
 
+  it("flags overrides outside the global allowlist as having no effect", () => {
+    setupSWR(id, {
+      global: { defaults: { enabled: true }, enabledRepos: ["acme/web"] },
+      repos: [
+        { repo: "acme/web", settings: { enabled: true } },
+        { repo: nestedRepo, settings: { enabled: true } },
+      ],
+    });
+
+    render(<Component />);
+
+    const warning = /not in the repository allowlist/i;
+    expect(within(overrideRow(nestedRepo)).getByText(warning)).toBeInTheDocument();
+    expect(within(overrideRow("acme/web")).queryByText(warning)).not.toBeInTheDocument();
+  });
+
+  it("does not flag overrides when every repository is in scope", () => {
+    setupSWR(id, {
+      global: { defaults: { enabled: true } },
+      repos: [{ repo: nestedRepo, settings: { enabled: true } }],
+    });
+
+    render(<Component />);
+
+    expect(
+      within(overrideRow(nestedRepo)).queryByText(/not in the repository allowlist/i)
+    ).not.toBeInTheDocument();
+  });
+
   it("deletes a nested-owner repository override", async () => {
     const user = userEvent.setup();
     setupSWR(id, {
