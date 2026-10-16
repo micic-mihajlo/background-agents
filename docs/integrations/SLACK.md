@@ -176,6 +176,10 @@ They show accessible repositories and environments plus **No repository**, which
 empty sandbox. Open-Inspect keeps the original request for one hour; after a target is selected, the
 session starts with that original request and thread context.
 
+The planned model is rechecked before launch. If it was disabled while the request was pending, the
+bot refuses to start a session rather than substituting another model. Send a new request with an
+enabled model.
+
 In shared channels, only the original requester can choose the target. If the dropdown has expired,
 send the request again and name the repository, environment, or that no repository is needed.
 
@@ -234,8 +238,13 @@ priority, highest to lowest:
 3. The Slack **Default model**.
 4. Deployment default model (`DEFAULT_MODEL`).
 
-The model must be enabled under **Settings > Models**. If the Slack **Default model** is disabled
-there, the bot uses the first enabled model until an administrator saves a different default.
+The effective model must be enabled under **Settings > Models**. If the App Home model, Slack
+**Default model**, or deployment/system default used by the request is disabled, the bot refuses to
+start a new session. It never substitutes a lower-priority default or the first enabled model.
+Re-enable the model or update the applicable preference or default. An enabled App Home model or
+leading `!model` override still works when a lower-priority default is disabled, provided the
+session's harness can run it. Existing-thread follow-ups without `!model` keep the session's model,
+even if it has since been disabled.
 
 If the session's harness cannot run the resolved model, the bot starts no session. Claude Agent runs
 Anthropic models only, so an OpenAI App Home model or `!model openai/gpt-5.4` is refused on Claude
@@ -253,8 +262,9 @@ is not offered for Claude Agent, because the settings page cannot see the deploy
 which may be one Claude Agent cannot run.
 
 A harness change applies to new sessions. Each thread keeps the harness its session started on. If
-the bot cannot read the Slack settings, it treats the workspace harness as OpenCode; a user's App
-Home harness still applies.
+the bot cannot read the Slack settings, App Home may show OpenCode as the workspace-harness display
+fallback without changing the user's saved App Home harness. This does not permit a new launch: new
+session requests are refused until Slack settings are available.
 
 Slack sessions are unattended, so on Claude Agent they follow the default Claude account's
 **Automated authentication** policy and may use a connected Claude account. This applies when a user
@@ -309,7 +319,8 @@ The web session is the best place to watch live output, inspect files, or take o
 
 When the agent finishes, Slack receives a completion reply with:
 
-- The agent's final response, shortened if it is too long for Slack
+- The agent's final response, rendered as Markdown (headings, lists, links, tables) and shortened if
+  it is too long for Slack. Broadcast mentions such as `@here` and `@channel` are removed.
 - Created artifacts such as pull requests or branches
 - A few key tool actions, such as edits or commands
 - The final status, model, session target, and reasoning effort when available
@@ -334,11 +345,14 @@ Slack sessions.
 | Branch           | A global branch override for new Slack sessions                              |
 | Branch by repo   | A branch override for one repository, shown when repositories are available  |
 
-The selector normally uses models enabled in **Settings > Models** in the web app. If Slack cannot
-load that list, it falls back to the default enabled models. It lists only models your agent harness
-can run. If your current model cannot run on it, the selector shows "Choose a model" with no
-selection and a note that new requests are refused until you choose a model. The "Currently using"
-summary names your model and agent harness.
+The selector uses models enabled in **Settings > Models** in the web app. If Slack cannot load that
+list, Home shows a temporary-unavailability notice and preserves your configured model and reasoning
+without treating the model as disabled. It lists only models your agent harness can run. If
+compatible enabled models are available but your current model is disabled or incompatible, the
+selector shows "Choose a model" with no selection and a refusal note. If no enabled model can run on
+the selected harness, Home shows a message instead of a selector, asking you to choose another
+harness or have an admin enable a compatible model. The "Currently using" summary names your model
+and agent harness, or marks the model as needing replacement.
 
 Branch preference priority is:
 
@@ -458,12 +472,13 @@ condition to filter by content. See
   automation's instructions; without an explicit instruction it will answer every message it is
   woken for. A run that opened a pull request or produced other artifacts always posts, and
   interactive `@mention` sessions never decline — a person is waiting on a visible answer there.
-- Authorized replies in a thread continue the same session, during the run and after it finishes,
-  for up to 7 days after the thread's first trigger, like replying in an `@mention` thread. The
-  reply is routed to that session as a follow-up prompt (re-spawned from a snapshot if it had gone
-  idle), gets its own 👀 reaction and in-thread response, and does **not** need to match the
-  trigger's text condition — conditions gate new runs, not replies that continue a thread. A reply
-  more than 7 days after the first trigger starts a fresh run.
+- Authorized replies in a thread continue the same session, while the run starts, during it, and
+  after it finishes, until the session has been idle for 7 days, like replying in an `@mention`
+  thread. The reply is routed to that session as a follow-up prompt (re-spawned from a snapshot if
+  it had gone idle; held until the run's own first prompt while the run is starting), gets its own
+  👀 reaction and in-thread response, and does **not** need to match the trigger's text condition —
+  conditions gate new runs, not replies that continue a thread. A reply after 7 idle days starts a
+  fresh run.
 
 The automation scheduler checks each reply author's session collaboration access; a rejected author
 does not start a replacement run for that automation. This is separate from interactive
