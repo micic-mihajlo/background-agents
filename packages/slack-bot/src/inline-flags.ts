@@ -87,9 +87,12 @@ export function normalizeModelSelection(defaults: {
   reasoningEffort?: string;
 }): ModelSelection {
   const model = getValidModelOrDefault(defaults.model);
+  const parsedReasoningEffort = defaults.reasoningEffort
+    ? reasoningEffortSchema.safeParse(defaults.reasoningEffort)
+    : null;
   const reasoningEffort =
-    defaults.reasoningEffort && isValidReasoningEffort(model, defaults.reasoningEffort)
-      ? (defaults.reasoningEffort as ReasoningEffort)
+    parsedReasoningEffort?.success && isValidReasoningEffort(model, parsedReasoningEffort.data)
+      ? parsedReasoningEffort.data
       : getDefaultReasoningEffort(model);
   return { model, reasoningEffort };
 }
@@ -101,7 +104,8 @@ export function sameModelSelection(a: ModelSelection, b: ModelSelection): boolea
 /**
  * Resolve one-turn overrides against the session defaults and enabled model
  * list. Only an explicit `!model` must be enabled; the session defaults are
- * kept as given, so a launch reconciles them with the enabled models first.
+ * kept as given. New-session launches separately refuse disabled models;
+ * existing-thread follow-ups keep their session model unless explicitly overridden.
  */
 export function resolveInlinePromptOptions(
   options: InlinePromptOptions,
@@ -112,17 +116,25 @@ export function resolveInlinePromptOptions(
     normalizeModelSelection(defaults);
   let modelOverride: ValidModel | undefined;
   if (options.model) {
-    if (!isValidModel(options.model)) {
+    const parsedModel = validModelSchema.safeParse(normalizeModelId(options.model));
+    if (!parsedModel.success) {
       return { ok: false, error: `Unknown model "${escapeMrkdwnText(options.model)}".` };
     }
-    modelOverride = normalizeModelId(options.model) as ValidModel;
+    modelOverride = parsedModel.data;
     if (!enabledModels.includes(modelOverride)) {
       return { ok: false, error: `Model "${modelOverride}" is not enabled.` };
     }
   }
 
   const effectiveModel = modelOverride ?? sessionModel;
-  if (options.reasoningEffort && !isValidReasoningEffort(effectiveModel, options.reasoningEffort)) {
+  const parsedReasoningEffort = options.reasoningEffort
+    ? reasoningEffortSchema.safeParse(options.reasoningEffort)
+    : null;
+  if (
+    options.reasoningEffort &&
+    (!parsedReasoningEffort?.success ||
+      !isValidReasoningEffort(effectiveModel, parsedReasoningEffort.data))
+  ) {
     const efforts = getReasoningConfig(effectiveModel)?.efforts;
     const suffix = efforts?.length
       ? ` Supported values: ${efforts.join(", ")}.`
@@ -133,7 +145,7 @@ export function resolveInlinePromptOptions(
     };
   }
 
-  const reasoningOverride = options.reasoningEffort as ReasoningEffort | undefined;
+  const reasoningOverride = parsedReasoningEffort?.success ? parsedReasoningEffort.data : undefined;
   const effectiveReasoningEffort = reasoningOverride
     ? reasoningOverride
     : modelOverride

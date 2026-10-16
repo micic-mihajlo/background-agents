@@ -326,6 +326,7 @@ export function SessionRightSidebarContent({
                 totalCost={sessionState.totalCost ?? 0}
                 maxSessionCostUsd={sessionState.maxSessionCostUsd}
                 canManageBudget={canManageBudget}
+                harness={sessionState.harness}
               />
             </MetadataSection>
             {/* Media the agent captured */}

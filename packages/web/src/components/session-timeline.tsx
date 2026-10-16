@@ -639,7 +639,11 @@ function AssistantMessageEvent({ event, copied, onCopyContent }: EventRendererPr
       bubbleClassName="w-full max-w-full"
       onCopyContent={onCopyContent}
     >
-      <SafeMarkdown content={event.content} className="text-sm leading-6" linkRepositoryFiles />
+      <SafeMarkdown
+        content={event.content}
+        className="text-sm leading-6"
+        linkMode="repositoryFiles"
+      />
     </MessageFrame>
   );
 }

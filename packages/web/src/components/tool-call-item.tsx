@@ -4,8 +4,7 @@ import type { SandboxEvent } from "@/types/session";
 import { formatSessionEventTime } from "@/lib/time";
 import { formatToolCall } from "@/lib/tool-formatters";
 import { extractLatestTasks } from "@/lib/tasks";
-import { SlackNotifyEvent } from "./slack-notify-event";
-import { CreatePullRequestEvent } from "./create-pull-request-event";
+import { getToolRenderer } from "./tool-call-renderers";
 import {
   Trace,
   TraceCollapsible,
@@ -27,7 +26,7 @@ import {
 
 type ToolCallEvent = Extract<SandboxEvent, { type: "tool_call" }>;
 
-interface ToolCallItemProps {
+export interface ToolCallItemProps {
   event: ToolCallEvent;
   isExpanded: boolean;
   onToggle: () => void;
@@ -162,25 +161,11 @@ function ToolCallDetails({ event }: { event: ToolCallEvent }) {
 
 /** One tool call as a trace line that expands into its details. */
 export function ToolCallItem({ event, isExpanded, onToggle, showTime = true }: ToolCallItemProps) {
-  if (event.tool?.toLowerCase() === "create-pull-request" && !event.truncated) {
+  const renderer = getToolRenderer(event);
+  const CustomItem = renderer?.Item;
+  if (CustomItem) {
     return (
-      <CreatePullRequestEvent
-        event={event}
-        isExpanded={isExpanded}
-        onToggle={onToggle}
-        showTime={showTime}
-      />
-    );
-  }
-
-  if (event.tool === "slack-notify" && !event.truncated) {
-    return (
-      <SlackNotifyEvent
-        event={event}
-        isExpanded={isExpanded}
-        onToggle={onToggle}
-        showTime={showTime}
-      />
+      <CustomItem event={event} isExpanded={isExpanded} onToggle={onToggle} showTime={showTime} />
     );
   }
 
@@ -208,7 +193,7 @@ export function ToolCallItem({ event, isExpanded, onToggle, showTime = true }: T
           </TraceLine>
         </TraceCollapsibleTrigger>
         <TraceCollapsibleContent>
-          <ToolCallDetails event={event} />
+          {renderer?.renderDetails?.(event) ?? <ToolCallDetails event={event} />}
         </TraceCollapsibleContent>
       </TraceCollapsible>
     </Trace>
