@@ -150,6 +150,7 @@ export function SessionSidebar({
     inProgress,
     finished,
     childrenMap,
+    unreadDescendantRootIds,
     loading,
     sessionsError,
     refreshSnapshot,
@@ -158,6 +159,7 @@ export function SessionSidebar({
     setSessionCreatorFilter,
     handleSessionArchived,
     handleMarkLatestMessageRead,
+    handleMarkHierarchyRead,
     handleMarkAllAttentionRead,
   } = useSidebarSessions();
   const activeTeamName = teams.find((team) => team.id === activeTeamId)?.name;
@@ -278,11 +280,13 @@ export function SessionSidebar({
                       : undefined
                   }
                   childrenMap={childrenMap}
+                  hasUnreadDescendants={unreadDescendantRootIds.has(session.id)}
                   currentSessionId={currentSessionId}
                   isMobile={isMobile}
                   onArchive={handleArchivedSession}
                   onSessionSelect={onSessionSelect}
                   onMarkLatestMessageRead={handleMarkLatestMessageRead}
+                  onMarkHierarchyRead={handleMarkHierarchyRead}
                 />
               ))}
               {Boolean(pagination.error) && (
